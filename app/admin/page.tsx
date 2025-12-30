@@ -1,12 +1,12 @@
 import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
-import HomePage from "@/components/home-page"
+import AdminDashboard from "@/components/admin-dashboard"
 
 export default function Page() {
   return (
     <LanguageProvider>
       <BlogProvider>
-        <HomePage />
+        <AdminDashboard />
       </BlogProvider>
     </LanguageProvider>
   )

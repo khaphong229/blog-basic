@@ -1,26 +1,178 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Updated background to white and cards to white for a cleaner look */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #242428;
+  --card: #ffffff;
+  --card-foreground: #242428;
+  --popover: #f7f7f8;
+  --popover-foreground: #242428;
+  --primary: #32adaf;
+  --primary-foreground: #ffffff;
+  --secondary: #5a4497;
+  --secondary-foreground: #ffffff;
+  --muted: #e5e5e7;
+  --muted-foreground: #59595c;
+  --accent: #bfe9ea;
+  --accent-foreground: #165556;
+  --destructive: #b20202;
+  --destructive-foreground: #ffffff;
+  --border: #d1d1d4;
+  --input: #d1d1d4;
+  --ring: #32adaf;
+  --chart-1: #32adaf;
+  --chart-2: #5a4497;
+  --chart-3: #2155ef;
+  --chart-4: #db5f15;
+  --chart-5: #8dc417;
+  --radius: 0.625rem;
+  --sidebar: #f7f7f8;
+  --sidebar-foreground: #242428;
+  --sidebar-primary: #32adaf;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #bfe9ea;
+  --sidebar-accent-foreground: #165556;
+  --sidebar-border: #d1d1d4;
+  --sidebar-ring: #32adaf;
+
+  /* Custom palette scales for direct use */
+  --primary-100: #e6f6f6;
+  --primary-200: #bfe9ea;
+  --primary-300: #8fd8d9;
+  --primary-400: #5ec4c6;
+  --primary-500: #32adaf;
+  --primary-600: #279092;
+  --primary-700: #1e7274;
+  --primary-800: #165556;
+  --primary-900: #0f3a3b;
+
+  --secondary-100: #eeeaf7;
+  --secondary-200: #d6cdf0;
+  --secondary-300: #b8aae4;
+  --secondary-400: #8e7ad2;
+  --secondary-500: #5a4497;
+  --secondary-600: #4a387f;
+  --secondary-700: #3a2c64;
+  --secondary-800: #2a1f48;
+  --secondary-900: #1b142e;
+}
+
+.dark {
+  /* Updated dark mode colors using the deeper tones from the palette */
+  --background: #16161a;
+  --foreground: #f7f7f8;
+  --card: #242428;
+  --card-foreground: #f7f7f8;
+  --popover: #242428;
+  --popover-foreground: #f7f7f8;
+  --primary: #5ec4c6;
+  --primary-foreground: #0f3a3b;
+  --secondary: #8e7ad2;
+  --secondary-foreground: #1b142e;
+  --muted: #242428;
+  --muted-foreground: #b5b5b8;
+  --accent: #1e7274;
+  --accent-foreground: #e6f6f6;
+  --destructive: #d94141;
+  --destructive-foreground: #ffffff;
+  --border: #3b3b3e;
+  --input: #3b3b3e;
+  --ring: #5ec4c6;
+  --chart-1: oklch(0.488 0.243 264.376); /* Kept existing as not specified in update */
+  --chart-2: oklch(0.696 0.17 162.48); /* Kept existing as not specified in update */
+  --chart-3: oklch(0.769 0.188 70.08); /* Kept existing as not specified in update */
+  --chart-4: oklch(0.627 0.265 303.9); /* Kept existing as not specified in update */
+  --chart-5: oklch(0.645 0.246 16.439); /* Kept existing as not specified in update */
+  --sidebar: #16161a;
+  --sidebar-foreground: #f7f7f8;
+  --sidebar-primary: #5ec4c6;
+  --sidebar-primary-foreground: #0f3a3b;
+  --sidebar-accent: #242428;
+  --sidebar-accent-foreground: #f7f7f8;
+  --sidebar-border: #3b3b3e;
+  --sidebar-ring: #5ec4c6;
 }
 
 @theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Added semantic scales to the theme for easier access in Tailwind */
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  --color-secondary-100: var(--secondary-100);
+  --color-secondary-200: var(--secondary-200);
+  --color-secondary-300: var(--secondary-300);
+  --color-secondary-400: var(--secondary-400);
+  --color-secondary-500: var(--secondary-500);
+  --color-secondary-600: var(--secondary-600);
+  --color-secondary-700: var(--secondary-700);
+  --color-secondary-800: var(--secondary-800);
+  --color-secondary-900: var(--secondary-900);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Added a subtle dot pattern background and animation utilities */
+@layer utilities {
+  .bg-dot-pattern {
+    background-image: radial-gradient(#d1d1d4 0.5px, transparent 0.5px);
+    background-size: 20px 20px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
