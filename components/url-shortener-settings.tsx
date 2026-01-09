@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Globe, Key, Eye, EyeOff, Play, CheckCircle2, XCircle, Clock, Save, Link2 } from "lucide-react"
 
 export default function URLShortenerSettings() {
   const { language, t } = useLanguage()
@@ -91,18 +92,34 @@ export default function URLShortenerSettings() {
 
   return (
     <div className="space-y-8">
-      {/* Tab Navigation */}
-      <div className="flex gap-2 border-b border-border">
+      {/* Section Header */}
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Link2 className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold">
+            {language === "en" ? "URL Shortener" : "Rút gọn URL"}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {language === "en" ? "Configure your URL shortening API" : "Cấu hình API rút gọn URL"}
+          </p>
+        </div>
+      </div>
+
+      {/* Tab Navigation - Pill style */}
+      <div className="flex p-1 rounded-xl bg-muted/50 w-fit">
         {(["en", "vi"] as const).map((lang) => (
           <button
             key={lang}
             onClick={() => handleTabChange(lang)}
-            className={`px-4 py-3 font-medium transition-colors border-b-2 ${
+            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === lang
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
+            <Globe className="w-4 h-4" />
             {lang === "en" ? "English API" : "Vietnamese API"}
           </button>
         ))}
@@ -145,17 +162,20 @@ export default function URLShortenerSettings() {
 
           {/* API Key */}
           <div>
-            <label className="block text-sm font-medium mb-2">{language === "en" ? "API Key" : "Khóa API"}</label>
+            <label className="flex items-center gap-2 text-sm font-medium mb-2">
+              <Key className="w-4 h-4 text-muted-foreground" />
+              {language === "en" ? "API Key" : "Khóa API"}
+            </label>
             <div className="flex gap-2">
               <Input
                 type={showKey ? "text" : "password"}
                 placeholder={language === "en" ? "Enter your API key" : "Nhập khóa API của bạn"}
                 value={formData.apiKey}
                 onChange={(e) => handleInputChange("apiKey", e.target.value)}
-                className="bg-secondary text-foreground"
+                className="bg-background border-border/70 font-mono"
               />
-              <Button variant="outline" onClick={() => setShowKey(!showKey)} className="px-3">
-                {showKey ? "Hide" : "Show"}
+              <Button variant="outline" onClick={() => setShowKey(!showKey)} className="px-3 cursor-pointer border-border/70">
+                {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
           </div>
@@ -260,13 +280,19 @@ export default function URLShortenerSettings() {
             >
               <div className="flex items-start gap-3">
                 <div
-                  className={`w-5 h-5 rounded-full flex-shrink-0 mt-0.5 ${
-                    testResult.success ? "bg-green-500" : "bg-red-500"
+                  className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center ${
+                    testResult.success ? "bg-green-100 dark:bg-green-900/50" : "bg-red-100 dark:bg-red-900/50"
                   }`}
-                />
+                >
+                  {testResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  )}
+                </div>
                 <div className="flex-1">
                   <p
-                    className={`font-medium ${testResult.success ? "text-green-900 dark:text-green-100" : "text-red-900 dark:text-red-100"}`}
+                    className={`font-medium text-sm ${testResult.success ? "text-green-900 dark:text-green-100" : "text-red-900 dark:text-red-100"}`}
                   >
                     {testResult.success
                       ? language === "en"
@@ -357,11 +383,12 @@ export default function URLShortenerSettings() {
       </Card>
 
       {/* Save Button - Sticky */}
-      <div className="sticky bottom-0 flex justify-end gap-3 p-4 bg-background border-t border-border">
-        <Button variant="outline" className="border-border bg-transparent">
+      <div className="sticky bottom-0 flex justify-end gap-3 p-4 -mx-6 md:-mx-8 bg-background/95 backdrop-blur-sm border-t border-border">
+        <Button variant="outline" className="border-border/70 cursor-pointer gap-2">
           {language === "en" ? "Cancel" : "Hủy"}
         </Button>
-        <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={handleSave} className="cursor-pointer gap-2">
+          <Save className="w-4 h-4" />
           {language === "en" ? "Save Settings" : "Lưu cài đặt"}
         </Button>
       </div>
