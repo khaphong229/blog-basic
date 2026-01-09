@@ -24,7 +24,7 @@ export default function HomePage() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-16 text-center"
         >
-          <h1 className="text-6xl font-extrabold mb-6 text-pretty tracking-tight">
+          <h1 className="text-6xl font-extrabold mb-6 text-pretty tracking-tight font-serif">
             {language === "en"
               ? "Welcome to Our Blog"
               : "Chào mừng đến Blog của chúng tôi"}

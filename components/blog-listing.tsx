@@ -5,10 +5,10 @@ import { useBlog } from "@/context/blog-context"
 import { useState, useMemo } from "react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { BlogCard } from "@/components/ui/blog-card"
 
 interface BlogListingProps {
   searchQuery: string
@@ -74,52 +74,19 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
           <p className="text-muted-foreground text-lg">{t("blog.noResults")}</p>
         </div>
       ) : (
-        <div className="grid gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
           <AnimatePresence mode="popLayout">
             {filteredPosts.map((post, index) => (
               <motion.div
                 key={post.id}
                 layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="h-full"
               >
-                <Link href={`/blog/${post.slug}`}>
-                  <Card className="hover:border-primary hover:shadow-lg transition-all cursor-pointer h-full bg-white group">
-                    <CardHeader>
-                      <CardTitle className="text-3xl text-pretty group-hover:text-primary transition-colors">
-                        {post.title}
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-2">
-                        <span className="font-medium text-foreground">{post.author}</span>
-                        <span className="text-muted-foreground">•</span>
-                        <span>{post.createdAt.toLocaleDateString(language === "en" ? "en-US" : "vi-VN")}</span>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-foreground/70 mb-6 text-lg line-clamp-3 leading-relaxed">{post.excerpt}</p>
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {post.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs font-medium bg-primary/5 text-primary border border-primary/10 px-3 py-1 rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex items-center justify-between border-t pt-4 border-border/50">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          {post.comments.length} {t("blog.comments")}
-                        </span>
-                        <span className="text-primary font-bold inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          {t("blog.readMore")} <span>→</span>
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <BlogCard post={post} language={language} />
               </motion.div>
             ))}
           </AnimatePresence>

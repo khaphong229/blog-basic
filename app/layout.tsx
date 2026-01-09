@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Merriweather } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
@@ -8,6 +8,11 @@ import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const merriweather = Merriweather({
+  subsets: ["latin", "vietnamese"],
+  weight: ["300", "400", "700", "900"],
+  variable: "--font-merriweather",
+})
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -39,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased ${merriweather.variable}`}>
         {/* <CHANGE> Added LanguageProvider and BlogProvider to wrap entire app */}
         <LanguageProvider>
           <BlogProvider>{children}</BlogProvider>
