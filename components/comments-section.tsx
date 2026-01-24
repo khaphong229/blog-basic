@@ -8,7 +8,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { MessageCircle, CheckCircle } from "lucide-react"
+import { MessageCircle, CheckCircle, Loader2 } from "lucide-react"
 
 interface CommentsSectionProps {
   post: BlogPost
@@ -20,55 +20,69 @@ export default function CommentsSection({ post }: CommentsSectionProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [comment, setComment] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
 
     if (!name.trim() || !email.trim() || !comment.trim()) {
       return
     }
 
-    addComment(post.id, {
-      name: name.trim(),
-      email: email.trim(),
-      content: comment.trim(),
-    })
+    setIsSubmitting(true)
 
-    setName("")
-    setEmail("")
-    setComment("")
-    setSubmitted(true)
+    try {
+      await addComment(post.id, {
+        name: name.trim(),
+        email: email.trim(),
+        content: comment.trim(),
+      })
 
-    setTimeout(() => setSubmitted(false), 3000)
+      setName("")
+      setEmail("")
+      setComment("")
+      setSubmitted(true)
+
+      setTimeout(() => setSubmitted(false), 3000)
+    } catch (err) {
+      console.error("Error adding comment:", err)
+      setError(
+        language === "en"
+          ? "Failed to add comment. Please try again."
+          : "Không thể thêm bình luận. Vui lòng thử lại."
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <section className="mt-20">
       {/* Visual separator - decorative break */}
-      <div className="flex items-center justify-center gap-4 mb-12">
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        <MessageCircle className="w-6 h-6 text-muted-foreground/50" />
-        <div className="flex-1 h-px bg-gradient-to-l from-transparent via-border to-transparent" />
+      <div className="mb-12 flex items-center justify-center gap-4">
+        <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
+        <MessageCircle className="text-muted-foreground/50 h-6 w-6" />
+        <div className="via-border h-px flex-1 bg-gradient-to-l from-transparent to-transparent" />
       </div>
 
       {/* Comments container with distinct background */}
-      <div className="max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl">
         {/* Section header */}
-        <div className="flex items-baseline justify-between mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold font-serif">
-            {t("blog.comments")}
-          </h2>
-          <span className="text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+        <div className="mb-8 flex items-baseline justify-between">
+          <h2 className="font-serif text-2xl font-bold md:text-3xl">{t("blog.comments")}</h2>
+          <span className="text-muted-foreground bg-muted/50 rounded-full px-3 py-1 text-sm">
             {post.comments.length} {language === "en" ? "responses" : "phản hồi"}
           </span>
         </div>
 
         {/* Comments List */}
-        <div className="space-y-6 mb-12">
+        <div className="mb-12 space-y-6">
           {post.comments.length === 0 ? (
-            <div className="text-center py-12 rounded-xl bg-muted/30 border border-border/50">
-              <MessageCircle className="w-10 h-10 mx-auto mb-4 text-muted-foreground/40" />
+            <div className="bg-muted/30 border-border/50 rounded-xl border py-12 text-center">
+              <MessageCircle className="text-muted-foreground/40 mx-auto mb-4 h-10 w-10" />
               <p className="text-muted-foreground">
                 {language === "en"
                   ? "No comments yet. Be the first to comment!"
@@ -77,23 +91,21 @@ export default function CommentsSection({ post }: CommentsSectionProps) {
             </div>
           ) : (
             post.comments.map((c) => (
-              <article 
+              <article
                 key={c.id}
-                className="group relative pl-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[2px] before:bg-gradient-to-b before:from-primary/30 before:to-transparent before:rounded-full"
+                className="group before:from-primary/30 relative pl-6 before:absolute before:top-0 before:bottom-0 before:left-0 before:w-[2px] before:rounded-full before:bg-gradient-to-b before:to-transparent"
               >
                 {/* Comment header */}
-                <div className="flex items-start gap-3 mb-3">
+                <div className="mb-3 flex items-start gap-3">
                   {/* Avatar */}
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/40 flex items-center justify-center text-secondary font-medium text-sm flex-shrink-0">
+                  <div className="from-secondary/20 to-secondary/40 text-secondary flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-medium">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
+
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                      <span className="font-semibold text-foreground">
-                        {c.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-foreground font-semibold">{c.name}</span>
+                      <span className="text-muted-foreground text-xs">
                         {c.createdAt.toLocaleDateString(language === "en" ? "en-US" : "vi-VN", {
                           year: "numeric",
                           month: "short",
@@ -101,11 +113,9 @@ export default function CommentsSection({ post }: CommentsSectionProps) {
                         })}
                       </span>
                     </div>
-                    
+
                     {/* Comment content */}
-                    <p className="mt-2 text-foreground/85 leading-relaxed">
-                      {c.content}
-                    </p>
+                    <p className="text-foreground/85 mt-2 leading-relaxed">{c.content}</p>
                   </div>
                 </div>
               </article>
@@ -114,42 +124,48 @@ export default function CommentsSection({ post }: CommentsSectionProps) {
         </div>
 
         {/* Comment Form - distinct container */}
-        <div className="bg-gradient-to-b from-muted/50 to-muted/20 rounded-2xl p-6 md:p-8 border border-border/50">
-          <h3 className="text-xl font-semibold mb-2">
-            {t("blog.leaveComment")}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            {language === "en" 
-              ? "Your email address will not be published." 
+        <div className="from-muted/50 to-muted/20 border-border/50 rounded-2xl border bg-gradient-to-b p-6 md:p-8">
+          <h3 className="mb-2 text-xl font-semibold">{t("blog.leaveComment")}</h3>
+          <p className="text-muted-foreground mb-6 text-sm">
+            {language === "en"
+              ? "Your email address will not be published."
               : "Email của bạn sẽ không được công khai."}
           </p>
 
           {/* Success message */}
           {submitted && (
-            <div className="mb-6 p-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="bg-primary/10 border-primary/30 mb-6 flex items-center gap-3 rounded-xl border p-4">
+              <CheckCircle className="text-primary h-5 w-5 flex-shrink-0" />
               <p className="text-primary font-medium">
                 {language === "en" ? "Thank you for your comment!" : "Cảm ơn bạn đã bình luận!"}
               </p>
             </div>
           )}
 
+          {/* Error message */}
+          {error && (
+            <div className="bg-destructive/10 border-destructive/30 mb-6 flex items-center gap-3 rounded-xl border p-4">
+              <p className="text-destructive font-medium">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">
+                <label className="text-foreground/80 text-sm font-medium">
                   {t("blog.yourName")} <span className="text-destructive">*</span>
                 </label>
-                <Input 
+                <Input
                   placeholder={language === "en" ? "John Doe" : "Nguyễn Văn A"}
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={isSubmitting}
                   className="bg-background/50"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">
+                <label className="text-foreground/80 text-sm font-medium">
                   {t("blog.yourEmail")} <span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -158,27 +174,43 @@ export default function CommentsSection({ post }: CommentsSectionProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isSubmitting}
                   className="bg-background/50"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">
+              <label className="text-foreground/80 text-sm font-medium">
                 {t("blog.comment")} <span className="text-destructive">*</span>
               </label>
               <Textarea
-                placeholder={language === "en" ? "Write your thoughts..." : "Viết suy nghĩ của bạn..."}
+                placeholder={
+                  language === "en" ? "Write your thoughts..." : "Viết suy nghĩ của bạn..."
+                }
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={4}
                 required
+                disabled={isSubmitting}
                 className="bg-background/50 resize-none"
               />
             </div>
 
-            <Button type="submit" size="lg" className="w-full sm:w-auto cursor-pointer">
-              {t("blog.submit")}
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full cursor-pointer sm:w-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {language === "en" ? "Submitting..." : "Đang gửi..."}
+                </>
+              ) : (
+                t("blog.submit")
+              )}
             </Button>
           </form>
         </div>

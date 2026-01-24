@@ -1,0 +1,110 @@
+// ===========================================
+// Blog Database Schema - DBML
+// Paste this into dbdiagram.io
+// ===========================================
+
+Project blog_supabase {
+  database_type: "PostgreSQL"
+  note: "Simplified Blog Database - No Auth"
+}
+
+Table posts {
+  id uuid [pk, default: `gen_random_uuid()`]
+  language text [not null, note: "vi | en"]
+  title text [not null]
+  slug text [not null]
+  excerpt text
+  content text [not null, note: "Markdown"]
+  author text [not null]
+  featured_image text
+  status text [default: "draft", note: "draft | published"]
+  published_at timestamptz
+  seo_title text
+  seo_description text
+  view_count bigint [default: 0]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+  
+  indexes {
+    (language, slug) [unique]
+    status
+    language
+    published_at [type: btree, note: "desc"]
+  }
+}
+
+Table tags {
+  id uuid [pk, default: `gen_random_uuid()`]
+  slug text [unique, not null]
+  name_vi text [not null]
+  name_en text [not null]
+  created_at timestamptz [default: `now()`]
+}
+
+Table post_tags {
+  post_id uuid [ref: > posts.id]
+  tag_id uuid [ref: > tags.id]
+  
+  indexes {
+    (post_id, tag_id) [pk]
+  }
+}
+
+Table comments {
+  id uuid [pk, default: `gen_random_uuid()`]
+  post_id uuid [ref: > posts.id, not null]
+  author_name text [not null]
+  author_email text [not null]
+  content text [not null]
+  status text [default: "visible", note: "visible | hidden"]
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    post_id
+    status
+  }
+}
+
+Table url_shortener_config {
+  id uuid [pk, default: `gen_random_uuid()`]
+  language text [unique, not null, note: "vi | en"]
+  provider text [not null]
+  endpoint text [not null]
+  api_key text [not null]
+  http_method text [default: "POST", note: "GET | POST | PUT"]
+  body_format text [not null, note: "Template string"]
+  is_active boolean [default: false]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table shortened_urls {
+  id uuid [pk, default: `gen_random_uuid()`]
+  original_url text [not null]
+  short_url text [unique, not null]
+  short_code text [unique]
+  language text [not null, note: "vi | en"]
+  post_id uuid [ref: > posts.id]
+  clicks integer [default: 0]
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    post_id
+    language
+  }
+}
+
+Table url_shortener_logs {
+  id uuid [pk, default: `gen_random_uuid()`]
+  language text [not null, note: "vi | en"]
+  test_url text [not null]
+  short_url text
+  status text [not null, note: "success | error"]
+  error_message text
+  created_at timestamptz [default: `now()`]
+  
+  indexes {
+    created_at [type: btree, note: "desc"]
+    language
+  }
+}
