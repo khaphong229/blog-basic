@@ -2,12 +2,15 @@
 
 import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
+import { motion } from "framer-motion"
+import Link from "next/link"
+import { Settings, FileText, PenLine, Terminal, Activity, Database, Cpu } from "lucide-react"
+
 import Navigation from "./navigation"
 import AdminPostForm from "./admin-post-form"
 import AdminPostsList from "./admin-posts-list"
-import Link from "next/link"
+import AnimatedGradientBackdrop from "./animated-gradient-backdrop"
 import { Button } from "@/components/ui/button"
-import { Settings, FileText, PenLine, LayoutDashboard } from "lucide-react"
 
 export default function AdminDashboard() {
   const { language, t } = useLanguage()
@@ -19,128 +22,210 @@ export default function AdminDashboard() {
     (p) => new Date().getTime() - p.createdAt.getTime() < 7 * 24 * 60 * 60 * 1000
   ).length
 
+  const stats = [
+    {
+      label: language === "en" ? "Total Posts" : "Tổng bài viết",
+      value: totalPosts,
+      icon: FileText,
+      color: "primary",
+      command: "ls -la posts/",
+    },
+    {
+      label: language === "en" ? "This Week" : "Tuần này",
+      value: recentPosts,
+      icon: PenLine,
+      color: "secondary",
+      command: "git log --since='1 week ago'",
+    },
+    {
+      label: language === "en" ? "Status" : "Trạng thái",
+      value: "ONLINE",
+      icon: Activity,
+      color: "primary",
+      command: "systemctl status blog",
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground relative min-h-screen overflow-hidden">
+      <AnimatedGradientBackdrop showMatrix={false} showGrid={true} showScanlines={true} />
       <Navigation />
 
-      <main className="container mx-auto px-4 pt-8 pb-24 md:pt-12 md:pb-32">
-        {/* Page Header - Visual grouping */}
-        <header className="mb-10 pb-6 border-b border-border">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                <LayoutDashboard className="w-6 h-6 text-primary" />
+      <main className="relative z-10 container mx-auto px-4 pt-24 pb-16">
+        {/* Page Header */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="border-border bg-card/80 border backdrop-blur-sm">
+            {/* Terminal header */}
+            <div className="border-border bg-muted/30 flex items-center gap-2 border-b px-4 py-3">
+              <div className="flex items-center gap-1.5">
+                <div className="bg-destructive/80 h-3 w-3 rounded-full" />
+                <div className="bg-accent/80 h-3 w-3 rounded-full" />
+                <div className="bg-primary/80 h-3 w-3 rounded-full" />
               </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  {t("admin.dashboard")}
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  {language === "en"
-                    ? "Manage your blog posts and content"
-                    : "Quản lý các bài viết blog và nội dung của bạn"}
-                </p>
-              </div>
-            </div>
-            <Link href="/admin/settings">
-              <Button 
-                variant="outline" 
-                className="gap-2 border-border bg-transparent hover:bg-muted transition-colors cursor-pointer"
-              >
-                <Settings className="w-4 h-4" />
-                {language === "en" ? "Settings" : "Cài đặt"}
-              </Button>
-            </Link>
-          </div>
-        </header>
-
-        {/* Quick Stats - Visual grouping with cards */}
-        <section className="mb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Total Posts Stat */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {language === "en" ? "Total Posts" : "Tổng bài viết"}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">{totalPosts}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Posts Stat */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-secondary/5 to-secondary/10 border border-secondary/20">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
-                  <PenLine className="w-5 h-5 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {language === "en" ? "This Week" : "Tuần này"}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">{recentPosts}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Action */}
-            <div className="p-6 rounded-xl bg-muted/30 border border-border/50 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground font-medium mb-1">
-                  {language === "en" ? "Quick Action" : "Thao tác nhanh"}
-                </p>
-                <p className="text-sm text-foreground/80">
-                  {language === "en" ? "Create a new post" : "Tạo bài viết mới"}
-                </p>
-              </div>
-              <a href="#create-post">
-                <Button size="sm" className="cursor-pointer">
-                  <PenLine className="w-4 h-4 mr-2" />
-                  {language === "en" ? "New" : "Tạo"}
-                </Button>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* Main Content - Two sections */}
-        <div className="space-y-16">
-          {/* Create New Post Section */}
-          <section id="create-post">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 rounded-full bg-primary" />
-              <h2 className="text-xl md:text-2xl font-bold">
-                {language === "en" ? "Create New Post" : "Tạo bài viết mới"}
-              </h2>
-            </div>
-            <AdminPostForm />
-          </section>
-
-          {/* Visual Separator */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-          </div>
-
-          {/* Posts List Section */}
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-8 rounded-full bg-secondary" />
-                <h2 className="text-xl md:text-2xl font-bold">
-                  {language === "en" ? "All Posts" : "Tất cả bài viết"}
-                </h2>
-                <span className="text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-                  {posts.length}
+              <div className="flex-1 text-center">
+                <span className="text-muted-foreground font-mono text-xs">
+                  admin@blog:~/dashboard — bash
                 </span>
               </div>
             </div>
-            <AdminPostsList posts={posts} />
-          </section>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="text-muted-foreground mb-2 flex items-center gap-2 font-mono text-xs">
+                    <span className="text-primary">$</span>
+                    <span>whoami</span>
+                  </div>
+                  <h1 className="text-foreground font-mono text-2xl font-bold md:text-3xl">
+                    <span className="text-primary">&gt;</span> {t("admin.dashboard")}
+                  </h1>
+                  <p className="text-muted-foreground mt-2 font-mono text-sm">
+                    <span className="text-secondary">//</span>{" "}
+                    {language === "en"
+                      ? "Manage your blog posts and content"
+                      : "Quản lý các bài viết blog và nội dung của bạn"}
+                  </p>
+                </div>
+                <Link href="/admin/settings">
+                  <Button variant="outline" className="gap-2 font-mono text-xs">
+                    <Settings className="h-4 w-4" />
+                    {language === "en" ? "config" : "cấu hình"}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </motion.header>
+
+        {/* Stats Grid */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-12"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + index * 0.1 }}
+                className="border-border bg-card/80 hover:border-primary/50 border backdrop-blur-sm transition-colors"
+              >
+                {/* Mini terminal header */}
+                <div className="border-border bg-muted/20 flex items-center gap-2 border-b px-3 py-2">
+                  <stat.icon
+                    className={`h-3 w-3 ${stat.color === "primary" ? "text-primary" : "text-secondary"}`}
+                  />
+                  <span className="text-muted-foreground truncate font-mono text-[10px]">
+                    {stat.command}
+                  </span>
+                </div>
+                {/* Stat content */}
+                <div className="p-4">
+                  <p className="text-muted-foreground mb-1 font-mono text-xs">{stat.label}</p>
+                  <p
+                    className={`font-mono text-2xl font-bold ${stat.color === "primary" ? "text-primary" : "text-secondary"}`}
+                  >
+                    {stat.value}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Main Content */}
+        <div className="space-y-12">
+          {/* Create New Post Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            id="create-post"
+          >
+            <div className="border-border bg-card/80 border backdrop-blur-sm">
+              {/* Section header */}
+              <div className="border-border bg-muted/30 flex items-center justify-between border-b px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <PenLine className="text-primary h-4 w-4" />
+                  <span className="text-foreground font-mono text-sm font-semibold">
+                    {language === "en" ? "new-post.sh" : "bai-viet-moi.sh"}
+                  </span>
+                </div>
+                <span className="text-muted-foreground font-mono text-xs">
+                  <span className="text-primary">$</span> vim new-post.md
+                </span>
+              </div>
+              <div className="p-6">
+                <AdminPostForm />
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
+            <Database className="text-muted-foreground h-4 w-4" />
+            <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
+          </div>
+
+          {/* Posts List Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="border-border bg-card/80 border backdrop-blur-sm">
+              {/* Section header */}
+              <div className="border-border bg-muted/30 flex items-center justify-between border-b px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="text-secondary h-4 w-4" />
+                  <span className="text-foreground font-mono text-sm font-semibold">
+                    {language === "en" ? "posts.db" : "bai-viet.db"}
+                  </span>
+                  <span className="text-muted-foreground bg-muted px-2 py-0.5 font-mono text-xs">
+                    {posts.length}
+                  </span>
+                </div>
+                <span className="text-muted-foreground font-mono text-xs">
+                  <span className="text-primary">$</span> SELECT * FROM posts
+                </span>
+              </div>
+              <div className="p-6">
+                <AdminPostsList posts={posts} />
+              </div>
+            </div>
+          </motion.section>
         </div>
+
+        {/* Footer */}
+        <motion.footer
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="border-border mt-12 border-t pt-6"
+        >
+          <div className="text-muted-foreground flex items-center justify-between font-mono text-xs">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-3.5 w-3.5" />
+              <span>
+                System Status: <span className="text-primary">OK</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Terminal className="h-3.5 w-3.5" />
+              <span className="text-primary">$</span>
+              <span className="animate-pulse">_</span>
+            </div>
+          </div>
+        </motion.footer>
       </main>
     </div>
   )

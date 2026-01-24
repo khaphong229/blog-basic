@@ -1,126 +1,154 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 
 /**
- * AnimatedGradientBackdrop
- * 
- * A reusable background component with animated gradient blur blobs.
- * Creates a modern, calm, premium aesthetic with slow drifting motion.
- * 
+ * AnimatedTerminalBackdrop
+ *
+ * Terminal-style animated background with matrix rain effect and grid pattern.
+ * Creates a hacker/developer aesthetic with subtle animations.
+ *
  * Features:
- * - Respects prefers-reduced-motion for accessibility
- * - Performant on mobile (uses CSS blur + transforms only)
- * - Subtle gradients that don't affect text readability
- * - Configurable colors via CSS custom properties
- * 
- * Blob Layout:
- * - Blob 1 (Primary): Top-left, largest, slow drift right-down
- * - Blob 2 (Secondary): Top-right, medium, slow drift left-down  
- * - Blob 3 (Accent): Bottom-center, smallest, subtle float up
+ * - Matrix-style falling characters
+ * - Grid pattern overlay
+ * - Scanlines effect
+ * - Respects prefers-reduced-motion
+ * - Subtle glow effects
  */
 
-interface AnimatedGradientBackdropProps {
+interface AnimatedTerminalBackdropProps {
   className?: string
+  showMatrix?: boolean
+  showGrid?: boolean
+  showScanlines?: boolean
 }
 
-export default function AnimatedGradientBackdrop({ 
-  className = "" 
-}: AnimatedGradientBackdropProps) {
-  // Respect user's motion preferences
-  const prefersReducedMotion = useReducedMotion()
+// Matrix rain characters
+const MATRIX_CHARS =
+  "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF<>/{}[]"
 
-  // Animation variants for blobs
-  const blobVariants = {
-    blob1: {
-      animate: prefersReducedMotion 
-        ? {} 
-        : {
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.05, 1],
-          },
-      transition: {
-        duration: 20,
-        repeat: Infinity,
-        ease: "easeInOut" as const,
-      },
-    },
-    blob2: {
-      animate: prefersReducedMotion 
-        ? {} 
-        : {
-            x: [0, -40, 0],
-            y: [0, 50, 0],
-            scale: [1, 0.95, 1],
-          },
-      transition: {
-        duration: 25,
-        repeat: Infinity,
-        ease: "easeInOut" as const,
-      },
-    },
-    blob3: {
-      animate: prefersReducedMotion 
-        ? {} 
-        : {
-            x: [0, 30, -20, 0],
-            y: [0, -40, 0],
-            scale: [1, 1.08, 1],
-          },
-      transition: {
-        duration: 30,
-        repeat: Infinity,
-        ease: "easeInOut" as const,
-      },
-    },
-  }
+function MatrixColumn({ delay, duration }: { delay: number; duration: number }) {
+  const [chars, setChars] = useState<string[]>([])
+
+  useEffect(() => {
+    const generateChars = () => {
+      const length = Math.floor(Math.random() * 15) + 5
+      return Array.from(
+        { length },
+        () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]
+      )
+    }
+    setChars(generateChars())
+
+    const interval = setInterval(() => {
+      setChars(generateChars())
+    }, duration * 1000)
+
+    return () => clearInterval(interval)
+  }, [duration])
 
   return (
-    <div 
-      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+    <motion.div
+      className="text-primary/20 absolute top-0 font-mono text-xs leading-tight select-none"
+      initial={{ y: "-100%", opacity: 0 }}
+      animate={{ y: "100vh", opacity: [0, 1, 1, 0] }}
+      transition={{
+        duration,
+        delay,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    >
+      {chars.map((char, i) => (
+        <div key={i} className={i === 0 ? "text-primary/60 text-glow-green" : ""}>
+          {char}
+        </div>
+      ))}
+    </motion.div>
+  )
+}
+
+export default function AnimatedTerminalBackdrop({
+  className = "",
+  showMatrix = true,
+  showGrid = true,
+  showScanlines = true,
+}: AnimatedTerminalBackdropProps) {
+  const prefersReducedMotion = useReducedMotion()
+  const [columns, setColumns] = useState<
+    Array<{ id: number; left: number; delay: number; duration: number }>
+  >([])
+
+  useEffect(() => {
+    if (prefersReducedMotion || !showMatrix) return
+
+    // Generate matrix columns
+    const numColumns = Math.floor(window.innerWidth / 30)
+    const newColumns = Array.from({ length: numColumns }, (_, i) => ({
+      id: i,
+      left: (i / numColumns) * 100,
+      delay: Math.random() * 10,
+      duration: Math.random() * 10 + 8,
+    }))
+    setColumns(newColumns)
+  }, [prefersReducedMotion, showMatrix])
+
+  return (
+    <div
+      className={`pointer-events-none fixed inset-0 overflow-hidden ${className}`}
       aria-hidden="true"
     >
-      {/* Blob 1 - Primary color, top-left, largest */}
-      <motion.div
-        className="absolute -top-32 -left-32 w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full opacity-[0.15] dark:opacity-[0.08]"
+      {/* Base gradient */}
+      <div
+        className="absolute inset-0"
         style={{
-          background: "radial-gradient(circle, var(--primary) 0%, transparent 70%)",
-          filter: "blur(80px)",
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.03) 0%, transparent 50%)",
         }}
-        animate={blobVariants.blob1.animate}
-        transition={blobVariants.blob1.transition}
       />
 
-      {/* Blob 2 - Secondary color, top-right, medium */}
-      <motion.div
-        className="absolute -top-20 -right-20 w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full opacity-[0.12] dark:opacity-[0.06]"
-        style={{
-          background: "radial-gradient(circle, var(--secondary) 0%, transparent 70%)",
-          filter: "blur(80px)",
-        }}
-        animate={blobVariants.blob2.animate}
-        transition={blobVariants.blob2.transition}
-      />
+      {/* Grid pattern */}
+      {showGrid && <div className="bg-grid-pattern absolute inset-0 opacity-50" />}
 
-      {/* Blob 3 - Accent blend, bottom-center, smallest */}
-      <motion.div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[350px] h-[350px] md:w-[450px] md:h-[450px] rounded-full opacity-[0.10] dark:opacity-[0.05]"
-        style={{
-          background: "radial-gradient(circle, var(--accent) 0%, var(--primary) 50%, transparent 70%)",
-          filter: "blur(100px)",
-        }}
-        animate={blobVariants.blob3.animate}
-        transition={blobVariants.blob3.transition}
-      />
+      {/* Matrix rain effect */}
+      {showMatrix && !prefersReducedMotion && (
+        <div className="absolute inset-0 overflow-hidden">
+          {columns.map((col) => (
+            <div key={col.id} className="absolute top-0" style={{ left: `${col.left}%` }}>
+              <MatrixColumn delay={col.delay} duration={col.duration} />
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Optional: Subtle noise texture overlay for premium feel */}
-      <div 
-        className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]"
+      {/* Scanlines overlay */}
+      {showScanlines && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)",
+          }}
+        />
+      )}
+
+      {/* Corner accents */}
+      <div className="border-primary/10 absolute top-0 left-0 h-32 w-32 border-t-2 border-l-2" />
+      <div className="border-primary/10 absolute top-0 right-0 h-32 w-32 border-t-2 border-r-2" />
+      <div className="border-primary/10 absolute bottom-0 left-0 h-32 w-32 border-b-2 border-l-2" />
+      <div className="border-primary/10 absolute right-0 bottom-0 h-32 w-32 border-r-2 border-b-2" />
+
+      {/* Subtle vignette */}
+      <div
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%)",
         }}
       />
     </div>
   )
 }
+
+// Export the old name for backward compatibility
+export { AnimatedTerminalBackdrop as AnimatedGradientBackdrop }

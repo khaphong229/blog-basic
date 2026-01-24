@@ -1,23 +1,36 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Merriweather } from "next/font/google"
+import { JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
-const merriweather = Merriweather({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "700", "900"],
-  variable: "--font-merriweather",
+  variable: "--font-mono",
 })
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "Terminal Blog | Developer's Journal",
+  description:
+    "A developer-focused blog with terminal aesthetic. Tutorials, insights, and tech stories.",
+  keywords: ["blog", "developer", "programming", "terminal", "tech", "tutorials"],
+  authors: [{ name: "Terminal Blog" }],
+  creator: "Terminal Blog",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "Terminal Blog",
+    title: "Terminal Blog | Developer's Journal",
+    description: "A developer-focused blog with terminal aesthetic",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terminal Blog | Developer's Journal",
+    description: "A developer-focused blog with terminal aesthetic",
+  },
   icons: {
     icon: [
       {
@@ -43,9 +56,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased ${merriweather.variable}`}>
-        {/* <CHANGE> Added LanguageProvider and BlogProvider to wrap entire app */}
+    <html lang="en" className="dark">
+      <body className={`font-mono antialiased ${jetbrainsMono.variable}`}>
         <LanguageProvider>
           <BlogProvider>{children}</BlogProvider>
         </LanguageProvider>
