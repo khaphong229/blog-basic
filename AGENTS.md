@@ -1,5 +1,26 @@
 # Project Overview & Rules
 
+## Critical Workflow Rule
+
+**NEVER STOP MIDWAY** - When given a task, complete it fully:
+
+1. Read all necessary files in ONE batch
+2. Make ALL required edits in sequence
+3. Continue until task is 100% complete
+4. Only stop when you explicitly confirm completion
+
+Do NOT:
+- Ask "should I continue?"
+- Stop after just reading files
+- Exit after partial completion
+- Request permission for next steps
+
+DO:
+- Work continuously until done
+- Handle multiple files in one go
+- Complete the entire scope
+- Report completion only when finished
+
 ## Tech Stack
 - **Framework**: Next.js 16.0.3 (App Router)
 - **Language**: TypeScript 5 (strict mode enabled)

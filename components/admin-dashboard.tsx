@@ -5,9 +5,17 @@ import { useBlog } from "@/context/blog-context"
 import Navigation from "./navigation"
 import AdminPostForm from "./admin-post-form"
 import AdminPostsList from "./admin-posts-list"
+import AnimatedGradientBackdrop from "./animated-gradient-backdrop"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Settings, FileText, PenLine, LayoutDashboard } from "lucide-react"
+import {
+  Settings,
+  FileText,
+  PenLine,
+  LayoutDashboard,
+  TrendingUp,
+  MessageSquare,
+} from "lucide-react"
 
 export default function AdminDashboard() {
   const { language, t } = useLanguage()
@@ -18,21 +26,23 @@ export default function AdminDashboard() {
   const recentPosts = posts.filter(
     (p) => new Date().getTime() - p.createdAt.getTime() < 7 * 24 * 60 * 60 * 1000
   ).length
+  const totalComments = posts.reduce((acc, p) => acc + p.comments.length, 0)
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground relative min-h-screen overflow-hidden">
+      <AnimatedGradientBackdrop />
       <Navigation />
 
-      <main className="container mx-auto px-4 pt-8 pb-24 md:pt-12 md:pb-32">
-        {/* Page Header - Visual grouping */}
-        <header className="mb-10 pb-6 border-b border-border">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <main className="relative z-10 container mx-auto px-4 pt-8 pb-24 md:pt-12 md:pb-32">
+        {/* Page Header */}
+        <header className="border-border/50 mb-10 border-b pb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                <LayoutDashboard className="w-6 h-6 text-primary" />
+              <div className="from-primary/20 to-primary/5 border-primary/20 shadow-primary/5 flex h-14 w-14 items-center justify-center rounded-2xl border bg-gradient-to-br shadow-lg">
+                <LayoutDashboard className="text-primary h-7 w-7" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                <h1 className="from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text text-3xl font-bold tracking-tight text-transparent md:text-4xl">
                   {t("admin.dashboard")}
                 </h1>
                 <p className="text-muted-foreground mt-1">
@@ -43,63 +53,78 @@ export default function AdminDashboard() {
               </div>
             </div>
             <Link href="/admin/settings">
-              <Button 
-                variant="outline" 
-                className="gap-2 border-border bg-transparent hover:bg-muted transition-colors cursor-pointer"
+              <Button
+                variant="outline"
+                className="border-border/50 bg-card/50 hover:bg-card gap-2 rounded-xl backdrop-blur-sm transition-all"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="h-4 w-4" />
                 {language === "en" ? "Settings" : "Cài đặt"}
               </Button>
             </Link>
           </div>
         </header>
 
-        {/* Quick Stats - Visual grouping with cards */}
+        {/* Quick Stats */}
         <section className="mb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Total Posts Stat */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+            <div className="group bg-card/50 border-border/50 hover:border-primary/30 hover:shadow-soft rounded-2xl border p-6 backdrop-blur-sm transition-all">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" />
+                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                  <FileText className="text-primary h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">
+                  <p className="text-muted-foreground text-sm font-medium">
                     {language === "en" ? "Total Posts" : "Tổng bài viết"}
                   </p>
-                  <p className="text-2xl font-bold text-foreground">{totalPosts}</p>
+                  <p className="text-foreground text-3xl font-bold">{totalPosts}</p>
                 </div>
               </div>
             </div>
 
             {/* Recent Posts Stat */}
-            <div className="p-6 rounded-xl bg-gradient-to-br from-secondary/5 to-secondary/10 border border-secondary/20">
+            <div className="group bg-card/50 border-border/50 hover:border-secondary/30 hover:shadow-soft rounded-2xl border p-6 backdrop-blur-sm transition-all">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
-                  <PenLine className="w-5 h-5 text-secondary" />
+                <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                  <TrendingUp className="text-secondary h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">
+                  <p className="text-muted-foreground text-sm font-medium">
                     {language === "en" ? "This Week" : "Tuần này"}
                   </p>
-                  <p className="text-2xl font-bold text-foreground">{recentPosts}</p>
+                  <p className="text-foreground text-3xl font-bold">{recentPosts}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Comments Stat */}
+            <div className="group bg-card/50 border-border/50 hover:border-accent/30 hover:shadow-soft rounded-2xl border p-6 backdrop-blur-sm transition-all">
+              <div className="flex items-center gap-4">
+                <div className="bg-accent/10 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
+                  <MessageSquare className="text-accent h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">
+                    {language === "en" ? "Comments" : "Bình luận"}
+                  </p>
+                  <p className="text-foreground text-3xl font-bold">{totalComments}</p>
                 </div>
               </div>
             </div>
 
             {/* Quick Action */}
-            <div className="p-6 rounded-xl bg-muted/30 border border-border/50 flex items-center justify-between">
+            <div className="from-primary/5 to-secondary/5 border-primary/20 flex items-center justify-between rounded-2xl border bg-gradient-to-br p-6">
               <div>
-                <p className="text-sm text-muted-foreground font-medium mb-1">
+                <p className="text-muted-foreground mb-1 text-sm font-medium">
                   {language === "en" ? "Quick Action" : "Thao tác nhanh"}
                 </p>
-                <p className="text-sm text-foreground/80">
+                <p className="text-foreground/80 text-sm">
                   {language === "en" ? "Create a new post" : "Tạo bài viết mới"}
                 </p>
               </div>
               <a href="#create-post">
-                <Button size="sm" className="cursor-pointer">
-                  <PenLine className="w-4 h-4 mr-2" />
+                <Button size="sm" className="shadow-primary/20 rounded-xl shadow-md">
+                  <PenLine className="mr-2 h-4 w-4" />
                   {language === "en" ? "New" : "Tạo"}
                 </Button>
               </a>
@@ -107,38 +132,42 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        {/* Main Content - Two sections */}
+        {/* Main Content */}
         <div className="space-y-16">
           {/* Create New Post Section */}
-          <section id="create-post">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 rounded-full bg-primary" />
-              <h2 className="text-xl md:text-2xl font-bold">
+          <section id="create-post" className="scroll-mt-24">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="from-primary to-primary/50 h-8 w-1.5 rounded-full bg-gradient-to-b" />
+              <h2 className="text-xl font-bold md:text-2xl">
                 {language === "en" ? "Create New Post" : "Tạo bài viết mới"}
               </h2>
             </div>
-            <AdminPostForm />
+            <div className="bg-card/50 border-border/50 rounded-2xl border p-6 backdrop-blur-sm md:p-8">
+              <AdminPostForm />
+            </div>
           </section>
 
           {/* Visual Separator */}
           <div className="flex items-center gap-4">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
           </div>
 
           {/* Posts List Section */}
           <section>
-            <div className="flex items-center justify-between mb-6">
+            <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-8 rounded-full bg-secondary" />
-                <h2 className="text-xl md:text-2xl font-bold">
+                <div className="from-secondary to-secondary/50 h-8 w-1.5 rounded-full bg-gradient-to-b" />
+                <h2 className="text-xl font-bold md:text-2xl">
                   {language === "en" ? "All Posts" : "Tất cả bài viết"}
                 </h2>
-                <span className="text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+                <span className="text-muted-foreground bg-muted/50 rounded-full px-3 py-1 text-sm">
                   {posts.length}
                 </span>
               </div>
             </div>
-            <AdminPostsList posts={posts} />
+            <div className="bg-card/50 border-border/50 rounded-2xl border p-6 backdrop-blur-sm md:p-8">
+              <AdminPostsList posts={posts} />
+            </div>
           </section>
         </div>
       </main>

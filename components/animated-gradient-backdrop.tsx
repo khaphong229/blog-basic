@@ -4,19 +4,19 @@ import { motion, useReducedMotion } from "framer-motion"
 
 /**
  * AnimatedGradientBackdrop
- * 
+ *
  * A reusable background component with animated gradient blur blobs.
  * Creates a modern, calm, premium aesthetic with slow drifting motion.
- * 
+ *
  * Features:
  * - Respects prefers-reduced-motion for accessibility
  * - Performant on mobile (uses CSS blur + transforms only)
  * - Subtle gradients that don't affect text readability
  * - Configurable colors via CSS custom properties
- * 
+ *
  * Blob Layout:
  * - Blob 1 (Primary): Top-left, largest, slow drift right-down
- * - Blob 2 (Secondary): Top-right, medium, slow drift left-down  
+ * - Blob 2 (Secondary): Top-right, medium, slow drift left-down
  * - Blob 3 (Accent): Bottom-center, smallest, subtle float up
  */
 
@@ -24,8 +24,8 @@ interface AnimatedGradientBackdropProps {
   className?: string
 }
 
-export default function AnimatedGradientBackdrop({ 
-  className = "" 
+export default function AnimatedGradientBackdrop({
+  className = "",
 }: AnimatedGradientBackdropProps) {
   // Respect user's motion preferences
   const prefersReducedMotion = useReducedMotion()
@@ -33,8 +33,8 @@ export default function AnimatedGradientBackdrop({
   // Animation variants for blobs
   const blobVariants = {
     blob1: {
-      animate: prefersReducedMotion 
-        ? {} 
+      animate: prefersReducedMotion
+        ? {}
         : {
             x: [0, 50, 0],
             y: [0, 30, 0],
@@ -47,8 +47,8 @@ export default function AnimatedGradientBackdrop({
       },
     },
     blob2: {
-      animate: prefersReducedMotion 
-        ? {} 
+      animate: prefersReducedMotion
+        ? {}
         : {
             x: [0, -40, 0],
             y: [0, 50, 0],
@@ -61,8 +61,8 @@ export default function AnimatedGradientBackdrop({
       },
     },
     blob3: {
-      animate: prefersReducedMotion 
-        ? {} 
+      animate: prefersReducedMotion
+        ? {}
         : {
             x: [0, 30, -20, 0],
             y: [0, -40, 0],
@@ -77,48 +77,51 @@ export default function AnimatedGradientBackdrop({
   }
 
   return (
-    <div 
-      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+    <div
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
       aria-hidden="true"
     >
-      {/* Blob 1 - Primary color, top-left, largest */}
+      {/* Blob 1 - Primary (Blue), top-left, largest - Knowledge & Trust */}
       <motion.div
-        className="absolute -top-32 -left-32 w-[500px] h-[500px] md:w-[600px] md:h-[600px] rounded-full opacity-[0.15] dark:opacity-[0.08]"
+        className="absolute -top-[10%] -left-[10%] h-[70vw] max-h-[800px] w-[70vw] max-w-[800px] rounded-full opacity-[0.12] mix-blend-multiply dark:opacity-[0.06] dark:mix-blend-screen"
         style={{
           background: "radial-gradient(circle, var(--primary) 0%, transparent 70%)",
-          filter: "blur(80px)",
+          filter: "blur(100px)",
         }}
         animate={blobVariants.blob1.animate}
         transition={blobVariants.blob1.transition}
       />
 
-      {/* Blob 2 - Secondary color, top-right, medium */}
+      {/* Blob 2 - Secondary (Orange), top-right - Creativity & Energy */}
       <motion.div
-        className="absolute -top-20 -right-20 w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full opacity-[0.12] dark:opacity-[0.06]"
+        className="absolute top-[5%] -right-[10%] h-[60vw] max-h-[600px] w-[60vw] max-w-[600px] rounded-full opacity-[0.10] mix-blend-multiply dark:opacity-[0.05] dark:mix-blend-screen"
         style={{
           background: "radial-gradient(circle, var(--secondary) 0%, transparent 70%)",
-          filter: "blur(80px)",
+          filter: "blur(90px)",
         }}
         animate={blobVariants.blob2.animate}
         transition={blobVariants.blob2.transition}
       />
 
-      {/* Blob 3 - Accent blend, bottom-center, smallest */}
+      {/* Blob 3 - Accent (Teal), bottom-left - Balance & Clarity */}
       <motion.div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[350px] h-[350px] md:w-[450px] md:h-[450px] rounded-full opacity-[0.10] dark:opacity-[0.05]"
+        className="absolute -bottom-[10%] -left-[5%] h-[65vw] max-h-[700px] w-[65vw] max-w-[700px] rounded-full opacity-[0.10] mix-blend-multiply dark:opacity-[0.05] dark:mix-blend-screen"
         style={{
-          background: "radial-gradient(circle, var(--accent) 0%, var(--primary) 50%, transparent 70%)",
-          filter: "blur(100px)",
+          background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+          filter: "blur(110px)",
         }}
         animate={blobVariants.blob3.animate}
         transition={blobVariants.blob3.transition}
       />
 
-      {/* Optional: Subtle noise texture overlay for premium feel */}
-      <div 
-        className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]"
+      {/* Modern Grid Pattern Overlay - Educational feel */}
+      <div
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
+          backgroundSize: "40px 40px",
+          maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
         }}
       />
     </div>
