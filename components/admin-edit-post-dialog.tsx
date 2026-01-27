@@ -26,6 +26,7 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
   const { language, t } = useLanguage()
   const { updatePost } = useBlog()
   const [open, setOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState(post.title)
   const [excerpt, setExcerpt] = useState(post.excerpt)
   const [content, setContent] = useState(post.content)
@@ -44,21 +45,35 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
     setTags(tags.filter((t) => t !== tag))
   }
 
-  const handleSave = () => {
-    if (!title.trim() || !excerpt.trim() || !content.trim() || !author.trim() || tags.length === 0) {
+  const handleSave = async () => {
+    if (
+      !title.trim() ||
+      !excerpt.trim() ||
+      !content.trim() ||
+      !author.trim() ||
+      tags.length === 0
+    ) {
       return
     }
 
-    updatePost(post.id, {
-      title: title.trim(),
-      excerpt: excerpt.trim(),
-      content: content.trim(),
-      author: author.trim(),
-      tags,
-    })
+    setIsSubmitting(true)
+    try {
+      await updatePost(post.id, {
+        title: title.trim(),
+        excerpt: excerpt.trim(),
+        content: content.trim(),
+        author: author.trim(),
+        tags,
+      })
 
-    setOpen(false)
-    onEdit()
+      setOpen(false)
+      onEdit()
+    } catch (error) {
+      console.error("Error updating post:", error)
+      alert(language === "en" ? "Failed to update post" : "Không thể cập nhật bài viết")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleCancel = () => {
@@ -78,7 +93,7 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
           {t("admin.edit")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("admin.edit")}</DialogTitle>
           <DialogDescription>
@@ -88,28 +103,34 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-semibold mb-2 block">{t("admin.title")}</label>
+            <label className="mb-2 block text-sm font-semibold">{t("admin.title")}</label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold mb-2 block">{language === "en" ? "Author" : "Tác giả"}</label>
+            <label className="mb-2 block text-sm font-semibold">
+              {language === "en" ? "Author" : "Tác giả"}
+            </label>
             <Input value={author} onChange={(e) => setAuthor(e.target.value)} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold mb-2 block">{language === "en" ? "Excerpt" : "Tóm tắt"}</label>
+            <label className="mb-2 block text-sm font-semibold">
+              {language === "en" ? "Excerpt" : "Tóm tắt"}
+            </label>
             <Textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={2} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold mb-2 block">{t("admin.content")}</label>
+            <label className="mb-2 block text-sm font-semibold">{t("admin.content")}</label>
             <RichTextEditor value={content} onChange={setContent} rows={6} />
           </div>
 
           <div>
-            <label className="text-sm font-semibold mb-2 block">{language === "en" ? "Tags" : "Thẻ"}</label>
-            <div className="flex gap-2 mb-2">
+            <label className="mb-2 block text-sm font-semibold">
+              {language === "en" ? "Tags" : "Thẻ"}
+            </label>
+            <div className="mb-2 flex gap-2">
               <Input
                 placeholder={language === "en" ? "Add a tag" : "Thêm thẻ"}
                 value={tagInput}
@@ -129,10 +150,14 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="bg-primary/10 text-primary text-sm px-2 py-1 rounded flex items-center gap-1"
+                  className="bg-primary/10 text-primary flex items-center gap-1 rounded px-2 py-1 text-sm"
                 >
                   {tag}
-                  <button type="button" onClick={() => handleRemoveTag(tag)} className="hover:text-primary/80">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:text-primary/80"
+                  >
                     ✕
                   </button>
                 </span>
@@ -140,12 +165,12 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
             </div>
           </div>
 
-          <div className="flex gap-2 justify-end pt-4">
-            <Button variant="outline" onClick={handleCancel}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
               {t("admin.cancel")}
             </Button>
-            <Button onClick={handleSave} disabled={tags.length === 0}>
-              {t("admin.save")}
+            <Button onClick={handleSave} disabled={tags.length === 0 || isSubmitting}>
+              {isSubmitting ? (language === "en" ? "Saving..." : "Đang lưu...") : t("admin.save")}
             </Button>
           </div>
         </div>

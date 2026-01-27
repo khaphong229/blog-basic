@@ -3,6 +3,12 @@
 import { createContext, useContext, useState, useCallback, type ReactNode, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import type { Post, PostWithTags, Tag, Language } from "@/lib/supabase"
+import {
+  getAllUrlConfigs,
+  upsertUrlConfig,
+  getRecentUrlLogs,
+  addUrlLog as apiAddUrlLog,
+} from "@/lib/api/url-shortener"
 
 // ===========================================
 // Types (giữ nguyên interface cũ để không break UI)
@@ -147,6 +153,64 @@ export function BlogProvider({ children }: { children: ReactNode }) {
   const [urlLogs, setUrlLogs] = useState<URLLog[]>([])
 
   // ===========================================
+  // Fetch URL Configs from Supabase
+  // ===========================================
+
+  const fetchUrlConfigs = useCallback(async () => {
+    try {
+      const configs = await getAllUrlConfigs()
+      // Map Supabase types to local types
+      setUrlConfigs({
+        en: configs.en
+          ? {
+              provider: configs.en.provider,
+              endpoint: configs.en.endpoint,
+              apiKey: configs.en.api_key,
+              httpMethod: configs.en.http_method,
+              bodyFormat: configs.en.body_format,
+              active: configs.en.is_active,
+            }
+          : null,
+        vi: configs.vi
+          ? {
+              provider: configs.vi.provider,
+              endpoint: configs.vi.endpoint,
+              apiKey: configs.vi.api_key,
+              httpMethod: configs.vi.http_method,
+              bodyFormat: configs.vi.body_format,
+              active: configs.vi.is_active,
+            }
+          : null,
+      })
+    } catch (err) {
+      console.error("Error fetching URL configs:", err)
+    }
+  }, [])
+
+  // ===========================================
+  // Fetch URL Logs from Supabase
+  // ===========================================
+
+  const fetchUrlLogs = useCallback(async () => {
+    try {
+      const logs = await getRecentUrlLogs(undefined, 50)
+      setUrlLogs(
+        logs.map((log) => ({
+          id: log.id,
+          timestamp: new Date(log.created_at),
+          originalUrl: log.test_url,
+          shortenedUrl: log.short_url || "",
+          language: log.language as "en" | "vi",
+          status: log.status === "success" ? "success" : "failed",
+          message: log.error_message || undefined,
+        }))
+      )
+    } catch (err) {
+      console.error("Error fetching URL logs:", err)
+    }
+  }, [])
+
+  // ===========================================
   // Fetch Posts from Supabase
   // ===========================================
 
@@ -250,7 +314,9 @@ export function BlogProvider({ children }: { children: ReactNode }) {
   // Initial fetch
   useEffect(() => {
     fetchPosts()
-  }, [fetchPosts])
+    fetchUrlConfigs()
+    fetchUrlLogs()
+  }, [fetchPosts, fetchUrlConfigs, fetchUrlLogs])
 
   // ===========================================
   // CRUD Operations
@@ -487,23 +553,50 @@ export function BlogProvider({ children }: { children: ReactNode }) {
   }
 
   // ===========================================
-  // URL Shortener (kept as local state for now)
+  // URL Shortener (integrated with Supabase)
   // ===========================================
 
-  const updateUrlConfig = (language: "en" | "vi", config: URLShortenerConfig) => {
-    setUrlConfigs((prev) => ({
-      ...prev,
-      [language]: config,
-    }))
+  const updateUrlConfig = async (language: "en" | "vi", config: URLShortenerConfig) => {
+    try {
+      await upsertUrlConfig({
+        language,
+        provider: config.provider,
+        endpoint: config.endpoint,
+        api_key: config.apiKey,
+        http_method: config.httpMethod,
+        body_format: config.bodyFormat,
+        is_active: config.active,
+      })
+
+      // Update local state
+      setUrlConfigs((prev) => ({
+        ...prev,
+        [language]: config,
+      }))
+
+      await fetchUrlConfigs()
+    } catch (err) {
+      console.error("Error updating URL config:", err)
+      throw err
+    }
   }
 
-  const addUrlLog = (log: Omit<URLLog, "id" | "timestamp">) => {
-    const newLog: URLLog = {
-      ...log,
-      id: Date.now().toString(),
-      timestamp: new Date(),
+  const addUrlLogLocal = async (log: Omit<URLLog, "id" | "timestamp">) => {
+    try {
+      await apiAddUrlLog({
+        language: log.language,
+        test_url: log.originalUrl,
+        short_url: log.shortenedUrl || null,
+        status: log.status === "success" ? "success" : "error",
+        error_message: log.message || null,
+      })
+
+      // Refresh logs
+      await fetchUrlLogs()
+    } catch (err) {
+      console.error("Error adding URL log:", err)
+      throw err
     }
-    setUrlLogs((prev) => [newLog, ...prev])
   }
 
   // ===========================================
@@ -529,7 +622,7 @@ export function BlogProvider({ children }: { children: ReactNode }) {
         urlConfigs,
         updateUrlConfig,
         urlLogs,
-        addUrlLog,
+        addUrlLog: addUrlLogLocal,
       }}
     >
       {children}

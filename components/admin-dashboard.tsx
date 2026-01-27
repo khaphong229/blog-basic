@@ -9,6 +9,7 @@ import { Settings, FileText, PenLine, Terminal, Activity, Database, Cpu } from "
 import Navigation from "./navigation"
 import AdminPostForm from "./admin-post-form"
 import AdminPostsList from "./admin-posts-list"
+import AdminComments from "./admin-comments"
 import AnimatedGradientBackdrop from "./animated-gradient-backdrop"
 import { Button } from "@/components/ui/button"
 
@@ -176,11 +177,27 @@ export default function AdminDashboard() {
             <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
           </div>
 
+          {/* Comment Moderation Section */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+          >
+            <AdminComments />
+          </motion.section>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
+            <Database className="text-muted-foreground h-4 w-4" />
+            <div className="via-border h-px flex-1 bg-gradient-to-r from-transparent to-transparent" />
+          </div>
+
           {/* Posts List Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
           >
             <div className="border-border bg-card/80 border backdrop-blur-sm">
               {/* Section header */}
