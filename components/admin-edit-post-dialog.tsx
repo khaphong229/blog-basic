@@ -170,7 +170,13 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
               {t("admin.cancel")}
             </Button>
             <Button onClick={handleSave} disabled={tags.length === 0 || isSubmitting}>
-              {isSubmitting ? (language === "en" ? "Saving..." : "Đang lưu...") : t("admin.save")}
+              {isSubmitting
+                ? language === "en"
+                  ? "Saving..."
+                  : post.language === "vi" && post.linkedPostId
+                    ? "Đang lưu & Dịch..."
+                    : "Đang lưu..."
+                : t("admin.save")}
             </Button>
           </div>
         </div>

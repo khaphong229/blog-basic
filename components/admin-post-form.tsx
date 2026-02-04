@@ -8,7 +8,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { X, Plus, Send, FileText, User, AlignLeft, Tag, AlertCircle } from "lucide-react"
+import { X, Plus, Send, FileText, User, AlignLeft, Tag, AlertCircle, Languages, Loader2 } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+// import { translatePost } from "@/lib/api/translation" // Moved to context
 
 export default function AdminPostForm() {
   const { language, t } = useLanguage()
@@ -20,8 +22,10 @@ export default function AdminPostForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState("")
   const [tags, setTags] = useState<string[]>([])
+
 
   const handleAddTag = () => {
     const normalizedTag = tagInput.trim().toLowerCase().replace(/\s+/g, "-")
@@ -68,6 +72,16 @@ export default function AdminPostForm() {
         status: "published",
       })
 
+      // Determine success message
+      const createdBoth = language === "vi"
+      setSuccessMessage(
+        createdBoth
+          ? "Đã tạo thành công cả bài viết tiếng Việt và tiếng Anh!"
+          : language === "en"
+            ? "Post created successfully!"
+            : "Đã tạo bài viết thành công!"
+      )
+
       // Reset form
       setTitle("")
       setExcerpt("")
@@ -76,8 +90,11 @@ export default function AdminPostForm() {
       setTags([])
       setSuccess(true)
 
-      // Hide success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000)
+      // Hide success message after 4 seconds (slightly longer for dual-post message)
+      setTimeout(() => {
+        setSuccess(false)
+        setSuccessMessage(null)
+      }, 4000)
     } catch (err) {
       console.error("Error creating post:", err)
       setError(
@@ -123,7 +140,7 @@ export default function AdminPostForm() {
           <div className="bg-primary/10 border-primary/30 mb-6 flex items-center gap-3 rounded-xl border p-4">
             <Send className="text-primary h-5 w-5 flex-shrink-0" />
             <p className="text-primary font-medium">
-              {language === "en" ? "Post created successfully!" : "Đã tạo bài viết thành công!"}
+              {successMessage || (language === "en" ? "Post created successfully!" : "Đã tạo bài viết thành công!")}
             </p>
           </div>
         )}
@@ -268,6 +285,25 @@ export default function AdminPostForm() {
             </div>
           </div>
 
+          {/* Auto-translate Info (only for Vietnamese posts) */}
+          {language === "vi" && (
+            <div className="bg-muted/30 border-border/50 rounded-lg border p-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                  <Languages className="text-primary h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-foreground text-sm font-medium">
+                    Tiếng Anh sẽ được tạo tự động
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    Hệ thống sẽ dùng AI để dịch và tạo bài viết tiếng Anh song song.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <div className="border-border/50 border-t pt-4">
             <Button
@@ -278,8 +314,8 @@ export default function AdminPostForm() {
             >
               {isSubmitting ? (
                 <>
-                  <span className="border-primary-foreground/30 border-t-primary-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2" />
-                  {language === "en" ? "Publishing..." : "Đang xuất bản..."}
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {language === "en" ? "Publishing..." : "Đang xuất bản & Dịch..."}
                 </>
               ) : (
                 <>

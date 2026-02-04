@@ -33,6 +33,7 @@ export interface Post {
   view_count: number
   created_at: string
   updated_at: string
+  linked_post_id: string | null
 }
 
 export interface Tag {

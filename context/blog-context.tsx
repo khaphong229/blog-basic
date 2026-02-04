@@ -9,6 +9,7 @@ import {
   getRecentUrlLogs,
   addUrlLog as apiAddUrlLog,
 } from "@/lib/api/url-shortener"
+import { translatePost } from "@/lib/api/translation"
 
 // ===========================================
 // Types (giữ nguyên interface cũ để không break UI)
@@ -42,6 +43,7 @@ export interface BlogPost {
   seoTitle?: string | null
   seoDescription?: string | null
   featuredImage?: string | null
+  linkedPostId?: string | null
 }
 
 export interface URLShortenerConfig {
@@ -132,6 +134,7 @@ function mapSupabasePostToBlogPost(post: PostWithTags, comments: Comment[] = [])
     seoTitle: post.seo_title,
     seoDescription: post.seo_description,
     featuredImage: post.featured_image,
+    linkedPostId: post.linked_post_id,
   }
 }
 
@@ -163,23 +166,23 @@ export function BlogProvider({ children }: { children: ReactNode }) {
       setUrlConfigs({
         en: configs.en
           ? {
-              provider: configs.en.provider,
-              endpoint: configs.en.endpoint,
-              apiKey: configs.en.api_key,
-              httpMethod: configs.en.http_method,
-              bodyFormat: configs.en.body_format,
-              active: configs.en.is_active,
-            }
+            provider: configs.en.provider,
+            endpoint: configs.en.endpoint,
+            apiKey: configs.en.api_key,
+            httpMethod: configs.en.http_method,
+            bodyFormat: configs.en.body_format,
+            active: configs.en.is_active,
+          }
           : null,
         vi: configs.vi
           ? {
-              provider: configs.vi.provider,
-              endpoint: configs.vi.endpoint,
-              apiKey: configs.vi.api_key,
-              httpMethod: configs.vi.http_method,
-              bodyFormat: configs.vi.body_format,
-              active: configs.vi.is_active,
-            }
+            provider: configs.vi.provider,
+            endpoint: configs.vi.endpoint,
+            apiKey: configs.vi.api_key,
+            httpMethod: configs.vi.http_method,
+            bodyFormat: configs.vi.body_format,
+            active: configs.vi.is_active,
+          }
           : null,
       })
     } catch (err) {
@@ -323,13 +326,29 @@ export function BlogProvider({ children }: { children: ReactNode }) {
   // ===========================================
 
   const addPost = async (
-    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "comments" | "slug" | "shortUrl">
+    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "comments" | "slug" | "shortUrl" | "linkedPostId">
   ) => {
     try {
       const slug = generateSlug(post.title)
       const now = new Date().toISOString()
+      let translationResult: any = null
 
-      // Insert post
+      // Automatically translate if Vietnamese
+      if (post.language === "vi") {
+        try {
+          translationResult = await translatePost({
+            title: post.title,
+            excerpt: post.excerpt,
+            content: post.content,
+            tags: post.tags,
+          })
+        } catch (error) {
+          console.error("Translation failed:", error)
+          throw new Error("Không thể dịch bài viết sang tiếng Anh. Vui lòng thử lại.")
+        }
+      }
+
+      // 1. Create main post
       const { data: newPost, error: insertError } = await supabase
         .from("posts")
         .insert({
@@ -350,46 +369,62 @@ export function BlogProvider({ children }: { children: ReactNode }) {
 
       if (insertError) throw insertError
 
-      // Handle tags - create if not exist, then link
-      if (post.tags && post.tags.length > 0) {
-        for (const tagSlug of post.tags) {
-          // Get or create tag
-          let { data: existingTag } = await supabase
-            .from("tags")
-            .select("id")
-            .eq("slug", tagSlug)
-            .single()
+      const newPostId = (newPost as { id: string }).id
 
-          if (!existingTag) {
-            const { data: newTag } = await supabase
-              .from("tags")
-              .insert({
-                slug: tagSlug,
-                name_vi: tagSlug,
-                name_en: tagSlug,
-              } as never)
-              .select("id")
-              .single()
-            existingTag = newTag
-          }
+      // 2. If translated, create English post and link them
+      if (post.language === "vi" && translationResult) {
+        const enSlug = generateSlug(translationResult.translatedTitle)
 
-          if (existingTag) {
-            await supabase.from("post_tags").insert({
-              post_id: (newPost as { id: string }).id,
-              tag_id: (existingTag as { id: string }).id,
-            } as never)
-          }
+        const { data: enPost, error: enInsertError } = await supabase
+          .from("posts")
+          .insert({
+            language: "en",
+            title: translationResult.translatedTitle,
+            slug: enSlug,
+            excerpt: translationResult.translatedExcerpt || null,
+            content: translationResult.translatedContent,
+            author: post.author,
+            featured_image: post.featuredImage || null,
+            status: post.status || "draft",
+            published_at: post.status === "published" ? now : null,
+            linked_post_id: newPostId, // Link to VI post
+          } as never)
+          .select()
+          .single()
+
+        if (enInsertError) {
+          // Rollback: delete VI post if EN creation fails
+          await supabase.from("posts").delete().eq("id", newPostId)
+          throw enInsertError
+        }
+
+        const enPostId = (enPost as { id: string }).id
+
+        // Update VI post to link to EN post
+        await supabase
+          .from("posts")
+          .update({ linked_post_id: enPostId } as never)
+          .eq("id", newPostId)
+
+        // Handle EN Tags
+        if (translationResult.translatedTags && translationResult.translatedTags.length > 0) {
+          await handleTags(enPostId, translationResult.translatedTags)
         }
       }
 
-      // Create short URL
+      // 3. Handle VI Tags
+      if (post.tags && post.tags.length > 0) {
+        await handleTags(newPostId, post.tags)
+      }
+
+      // 4. Create short URL for main post
       const shortCode = generateShortCode()
       await supabase.from("shortened_urls").insert({
         original_url: `/blog/${slug}`,
         short_url: `/s/${shortCode}`,
         short_code: shortCode,
         language: post.language,
-        post_id: (newPost as { id: string }).id,
+        post_id: newPostId,
       } as never)
 
       // Refresh posts
@@ -400,9 +435,46 @@ export function BlogProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Helper for tagging
+  const handleTags = async (postId: string, tagSlugs: string[]) => {
+    for (const tagSlug of tagSlugs) {
+      // Get or create tag
+      let { data: existingTag } = await supabase
+        .from("tags")
+        .select("id")
+        .eq("slug", tagSlug)
+        .single()
+
+      if (!existingTag) {
+        const { data: newTag } = await supabase
+          .from("tags")
+          .insert({
+            slug: tagSlug,
+            name_vi: tagSlug,
+            name_en: tagSlug,
+          } as never)
+          .select("id")
+          .single()
+        existingTag = newTag
+      }
+
+      if (existingTag) {
+        await supabase.from("post_tags").insert({
+          post_id: postId,
+          tag_id: (existingTag as { id: string }).id,
+        } as never)
+      }
+    }
+  }
+
   const updatePost = async (id: string, updates: Partial<BlogPost>) => {
     try {
       const updateData: Record<string, unknown> = {}
+
+      // Check if we need to auto-translate (VI post updated)
+      const currentPost = posts.find(p => p.id === id)
+      const isViPost = currentPost?.language === "vi"
+      const hasLinkedPost = !!currentPost?.linkedPostId
 
       if (updates.title !== undefined) updateData.title = updates.title
       if (updates.content !== undefined) updateData.content = updates.content
@@ -418,6 +490,38 @@ export function BlogProvider({ children }: { children: ReactNode }) {
       if (updates.seoTitle !== undefined) updateData.seo_title = updates.seoTitle
       if (updates.seoDescription !== undefined) updateData.seo_description = updates.seoDescription
       if (updates.featuredImage !== undefined) updateData.featured_image = updates.featuredImage
+      if (updates.linkedPostId !== undefined) updateData.linked_post_id = updates.linkedPostId
+
+      // Auto-translate logic if VI post is updated and has linked post
+      if (isViPost && hasLinkedPost) {
+        try {
+          const translation = await translatePost({
+            title: (updates.title || currentPost.title),
+            excerpt: (updates.excerpt || currentPost.excerpt),
+            content: (updates.content || currentPost.content),
+            tags: (updates.tags || currentPost.tags),
+          })
+
+          // Update linked EN post
+          if (currentPost.linkedPostId) {
+            await supabase.from("posts").update({
+              title: translation.translatedTitle,
+              excerpt: translation.translatedExcerpt,
+              content: translation.translatedContent,
+              // Note: We might want to sync other fields too, but keeping it simple for now
+            } as never).eq("id", currentPost.linkedPostId)
+
+            // Update EN tags
+            await supabase.from("post_tags").delete().eq("post_id", currentPost.linkedPostId)
+            if (translation.translatedTags && translation.translatedTags.length > 0) {
+              await handleTags(currentPost.linkedPostId, translation.translatedTags)
+            }
+          }
+        } catch (error) {
+          console.error("Auto-translation for update failed:", error)
+          throw new Error("Không thể cập nhật bản dịch tiếng Anh. Vui lòng thử lại.")
+        }
+      }
 
       if (Object.keys(updateData).length > 0) {
         const { error: updateError } = await supabase
@@ -432,35 +536,7 @@ export function BlogProvider({ children }: { children: ReactNode }) {
       if (updates.tags !== undefined) {
         // Remove existing tags
         await supabase.from("post_tags").delete().eq("post_id", id)
-
-        // Add new tags
-        for (const tagSlug of updates.tags) {
-          let { data: existingTag } = await supabase
-            .from("tags")
-            .select("id")
-            .eq("slug", tagSlug)
-            .single()
-
-          if (!existingTag) {
-            const { data: newTag } = await supabase
-              .from("tags")
-              .insert({
-                slug: tagSlug,
-                name_vi: tagSlug,
-                name_en: tagSlug,
-              } as never)
-              .select("id")
-              .single()
-            existingTag = newTag
-          }
-
-          if (existingTag) {
-            await supabase.from("post_tags").insert({
-              post_id: id,
-              tag_id: (existingTag as { id: string }).id,
-            } as never)
-          }
-        }
+        await handleTags(id, updates.tags)
       }
 
       // Refresh posts
