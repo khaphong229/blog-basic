@@ -4,103 +4,100 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated background to white and cards to white for a cleaner look */
-  --background: #ffffff;
-  --foreground: #242428;
-  --card: #ffffff;
-  --card-foreground: #242428;
-  --popover: #f7f7f8;
-  --popover-foreground: #242428;
-  --primary: #32adaf;
-  --primary-foreground: #ffffff;
-  --secondary: #5a4497;
-  --secondary-foreground: #ffffff;
-  --muted: #e5e5e7;
-  --muted-foreground: #59595c;
-  --accent: #bfe9ea;
-  --accent-foreground: #165556;
-  --destructive: #b20202;
+  /* Terminal UI - Light Mode (rarely used, but defined for completeness) */
+  --background: #1a1a2e;
+  --foreground: #eaeaea;
+  --card: #16213e;
+  --card-foreground: #eaeaea;
+  --popover: #16213e;
+  --popover-foreground: #eaeaea;
+  --primary: #00ff88;
+  --primary-foreground: #0a0a0a;
+  --secondary: #00d4ff;
+  --secondary-foreground: #0a0a0a;
+  --muted: #2a2a4a;
+  --muted-foreground: #888888;
+  --accent: #ff6b35;
+  --accent-foreground: #0a0a0a;
+  --destructive: #ff3333;
   --destructive-foreground: #ffffff;
-  --border: #d1d1d4;
-  --input: #d1d1d4;
-  --ring: #32adaf;
-  --chart-1: #32adaf;
-  --chart-2: #5a4497;
-  --chart-3: #2155ef;
-  --chart-4: #db5f15;
-  --chart-5: #8dc417;
-  --radius: 0.625rem;
-  --sidebar: #f7f7f8;
-  --sidebar-foreground: #242428;
-  --sidebar-primary: #32adaf;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #bfe9ea;
-  --sidebar-accent-foreground: #165556;
-  --sidebar-border: #d1d1d4;
-  --sidebar-ring: #32adaf;
+  --border: #3a3a5a;
+  --input: #2a2a4a;
+  --ring: #00ff88;
+  --chart-1: #00ff88;
+  --chart-2: #00d4ff;
+  --chart-3: #ff6b35;
+  --chart-4: #a855f7;
+  --chart-5: #fbbf24;
+  --radius: 0;
+  --sidebar: #0f0f1a;
+  --sidebar-foreground: #eaeaea;
+  --sidebar-primary: #00ff88;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1a1a2e;
+  --sidebar-accent-foreground: #eaeaea;
+  --sidebar-border: #3a3a5a;
+  --sidebar-ring: #00ff88;
 
-  /* Custom palette scales for direct use */
-  --primary-100: #e6f6f6;
-  --primary-200: #bfe9ea;
-  --primary-300: #8fd8d9;
-  --primary-400: #5ec4c6;
-  --primary-500: #32adaf;
-  --primary-600: #279092;
-  --primary-700: #1e7274;
-  --primary-800: #165556;
-  --primary-900: #0f3a3b;
+  /* Terminal color palette */
+  --terminal-green: #00ff88;
+  --terminal-cyan: #00d4ff;
+  --terminal-orange: #ff6b35;
+  --terminal-purple: #a855f7;
+  --terminal-yellow: #fbbf24;
+  --terminal-red: #ff3333;
+  --terminal-bg: #0a0a0f;
+  --terminal-surface: #12121a;
+  --terminal-border: #2a2a3a;
+  --terminal-text: #eaeaea;
+  --terminal-text-dim: #666680;
 
-  --secondary-100: #eeeaf7;
-  --secondary-200: #d6cdf0;
-  --secondary-300: #b8aae4;
-  --secondary-400: #8e7ad2;
-  --secondary-500: #5a4497;
-  --secondary-600: #4a387f;
-  --secondary-700: #3a2c64;
-  --secondary-800: #2a1f48;
-  --secondary-900: #1b142e;
+  /* Glow effects */
+  --glow-green: 0 0 20px rgba(0, 255, 136, 0.3);
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3);
+  --glow-orange: 0 0 20px rgba(255, 107, 53, 0.3);
 }
 
 .dark {
-  /* Updated dark mode colors using the deeper tones from the palette */
-  --background: #16161a;
-  --foreground: #f7f7f8;
-  --card: #242428;
-  --card-foreground: #f7f7f8;
-  --popover: #242428;
-  --popover-foreground: #f7f7f8;
-  --primary: #5ec4c6;
-  --primary-foreground: #0f3a3b;
-  --secondary: #8e7ad2;
-  --secondary-foreground: #1b142e;
-  --muted: #242428;
-  --muted-foreground: #b5b5b8;
-  --accent: #1e7274;
-  --accent-foreground: #e6f6f6;
-  --destructive: #d94141;
+  /* Terminal UI - Dark Mode (Primary theme) */
+  --background: #0a0a0f;
+  --foreground: #eaeaea;
+  --card: #12121a;
+  --card-foreground: #eaeaea;
+  --popover: #12121a;
+  --popover-foreground: #eaeaea;
+  --primary: #00ff88;
+  --primary-foreground: #0a0a0a;
+  --secondary: #00d4ff;
+  --secondary-foreground: #0a0a0a;
+  --muted: #1a1a2e;
+  --muted-foreground: #666680;
+  --accent: #ff6b35;
+  --accent-foreground: #0a0a0a;
+  --destructive: #ff3333;
   --destructive-foreground: #ffffff;
-  --border: #3b3b3e;
-  --input: #3b3b3e;
-  --ring: #5ec4c6;
-  --chart-1: oklch(0.488 0.243 264.376); /* Kept existing as not specified in update */
-  --chart-2: oklch(0.696 0.17 162.48); /* Kept existing as not specified in update */
-  --chart-3: oklch(0.769 0.188 70.08); /* Kept existing as not specified in update */
-  --chart-4: oklch(0.627 0.265 303.9); /* Kept existing as not specified in update */
-  --chart-5: oklch(0.645 0.246 16.439); /* Kept existing as not specified in update */
-  --sidebar: #16161a;
-  --sidebar-foreground: #f7f7f8;
-  --sidebar-primary: #5ec4c6;
-  --sidebar-primary-foreground: #0f3a3b;
-  --sidebar-accent: #242428;
-  --sidebar-accent-foreground: #f7f7f8;
-  --sidebar-border: #3b3b3e;
-  --sidebar-ring: #5ec4c6;
+  --border: #2a2a3a;
+  --input: #1a1a2e;
+  --ring: #00ff88;
+  --chart-1: #00ff88;
+  --chart-2: #00d4ff;
+  --chart-3: #ff6b35;
+  --chart-4: #a855f7;
+  --chart-5: #fbbf24;
+  --sidebar: #0a0a0f;
+  --sidebar-foreground: #eaeaea;
+  --sidebar-primary: #00ff88;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1a1a2e;
+  --sidebar-accent-foreground: #eaeaea;
+  --sidebar-border: #2a2a3a;
+  --sidebar-ring: #00ff88;
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
-  --font-serif: var(--font-merriweather), "Georgia", serif;
+  --font-sans: "Geist Mono", "JetBrains Mono", "Fira Code", monospace;
+  --font-mono: "Geist Mono", "JetBrains Mono", "Fira Code", monospace;
+  --font-serif: "Geist Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -126,31 +123,23 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* Added semantic scales to the theme for easier access in Tailwind */
-  --color-primary-100: var(--primary-100);
-  --color-primary-200: var(--primary-200);
-  --color-primary-300: var(--primary-300);
-  --color-primary-400: var(--primary-400);
-  --color-primary-500: var(--primary-500);
-  --color-primary-600: var(--primary-600);
-  --color-primary-700: var(--primary-700);
-  --color-primary-800: var(--primary-800);
-  --color-primary-900: var(--primary-900);
+  /* Terminal colors exposed to Tailwind */
+  --color-terminal-green: var(--terminal-green);
+  --color-terminal-cyan: var(--terminal-cyan);
+  --color-terminal-orange: var(--terminal-orange);
+  --color-terminal-purple: var(--terminal-purple);
+  --color-terminal-yellow: var(--terminal-yellow);
+  --color-terminal-red: var(--terminal-red);
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-surface: var(--terminal-surface);
+  --color-terminal-border: var(--terminal-border);
+  --color-terminal-text: var(--terminal-text);
+  --color-terminal-text-dim: var(--terminal-text-dim);
 
-  --color-secondary-100: var(--secondary-100);
-  --color-secondary-200: var(--secondary-200);
-  --color-secondary-300: var(--secondary-300);
-  --color-secondary-400: var(--secondary-400);
-  --color-secondary-500: var(--secondary-500);
-  --color-secondary-600: var(--secondary-600);
-  --color-secondary-700: var(--secondary-700);
-  --color-secondary-800: var(--secondary-800);
-  --color-secondary-900: var(--secondary-900);
-
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -161,11 +150,128 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Added a subtle dot pattern background and animation utilities */
+/* Terminal-style utilities */
 @layer utilities {
-  .bg-dot-pattern {
-    background-image: radial-gradient(#d1d1d4 0.5px, transparent 0.5px);
+  /* Scanline effect */
+  .bg-scanlines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+  }
+
+  /* Grid pattern background */
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
     background-size: 20px 20px;
+  }
+
+  /* Dot pattern */
+  .bg-dot-pattern {
+    background-image: radial-gradient(rgba(0, 255, 136, 0.15) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  /* Terminal glow effects */
+  .glow-green {
+    box-shadow: var(--glow-green);
+  }
+  .glow-cyan {
+    box-shadow: var(--glow-cyan);
+  }
+  .glow-orange {
+    box-shadow: var(--glow-orange);
+  }
+
+  /* Text glow */
+  .text-glow-green {
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  }
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+
+  /* Terminal cursor blink */
+  .cursor-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  /* Typing animation */
+  .typing-effect {
+    overflow: hidden;
+    border-right: 2px solid var(--terminal-green);
+    white-space: nowrap;
+    animation:
+      typing 3s steps(40, end),
+      blink-caret 0.75s step-end infinite;
+  }
+
+  /* Terminal border styles */
+  .terminal-border {
+    border: 1px solid var(--terminal-border);
+  }
+  .terminal-border-glow {
+    border: 1px solid var(--terminal-green);
+    box-shadow:
+      0 0 10px rgba(0, 255, 136, 0.2),
+      inset 0 0 10px rgba(0, 255, 136, 0.05);
+  }
+
+  /* Terminal window header dots */
+  .terminal-dots::before {
+    content: "";
+    display: inline-flex;
+    gap: 6px;
+    margin-right: 12px;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--terminal-green);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
   }
 }
 
@@ -174,6 +280,28 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono antialiased;
+  }
+
+  /* Custom scrollbar for terminal feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--terminal-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--terminal-border);
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--terminal-green);
+  }
+
+  /* Selection color */
+  ::selection {
+    background: rgba(0, 255, 136, 0.3);
+    color: #ffffff;
   }
 }
