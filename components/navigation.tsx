@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Terminal, Menu, X } from "lucide-react"
+import { Code2, Menu, X, LayoutDashboard } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
@@ -23,92 +23,63 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Update time
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date()
-      setCurrentTime(
-        now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })
-      )
-    }
-    updateTime()
-    const interval = setInterval(updateTime, 1000)
-    return () => clearInterval(interval)
-  }, [])
+  // Time effect removed for clean design
+
 
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-background/95 border-border border-b shadow-[0_0_20px_rgba(0,255,136,0.05)] backdrop-blur-sm"
+      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${isScrolled
+          ? "bg-background/80 border-border border-b shadow-sm backdrop-blur-md"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="relative">
-              <Terminal className="text-primary group-hover:text-glow-green h-6 w-6 transition-all" />
-              <div className="bg-primary absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full" />
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-80">
+            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
+              <Code2 className="text-primary h-5 w-5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-foreground group-hover:text-primary font-mono text-lg font-bold transition-colors">
-                ./blog
-              </span>
-              <span className="text-muted-foreground font-mono text-[10px] tracking-widest uppercase">
-                v1.0.0
+              <span className="text-foreground text-lg font-bold tracking-tight">
+                DevBlog
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden items-center gap-6 md:flex">
-            {/* Status indicator */}
-            <div className="text-muted-foreground flex items-center gap-2 font-mono text-xs">
-              <span className="text-primary">[</span>
-              <span className="bg-primary h-2 w-2 animate-pulse rounded-full" />
-              <span>ONLINE</span>
-              <span className="text-primary">]</span>
-            </div>
-
-            {/* Time */}
-            <div className="text-muted-foreground border-border border px-3 py-1 font-mono text-xs">
-              <span className="text-primary">$</span> {currentTime}
-            </div>
+            {/* Clean Spacer */}
+            <div className="hidden lg:block" />
 
             {/* Language selector */}
-            <div className="border-border flex items-center gap-1 border">
+            {/* Language selector - Clean style */}
+            <div className="bg-muted/50 flex items-center gap-1 rounded-full p-1">
               <Button
                 variant={language === "en" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setLanguage("en")}
-                className="h-8 text-xs"
+                className={`h-7 rounded-full text-xs px-3 ${language === "en" ? "bg-white text-black shadow-sm hover:bg-white/90" : "hover:bg-transparent"}`}
               >
                 EN
               </Button>
-              <div className="bg-border h-4 w-px" />
               <Button
                 variant={language === "vi" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setLanguage("vi")}
-                className="h-8 text-xs"
+                className={`h-7 rounded-full text-xs px-3 ${language === "vi" ? "bg-white text-black shadow-sm hover:bg-white/90" : "hover:bg-transparent"}`}
               >
                 VI
               </Button>
             </div>
 
             {/* Admin link */}
+            {/* Admin link */}
             <Link href="/admin">
-              <Button variant="outline" size="sm" className="text-xs">
-                <span className="text-primary mr-1">&gt;</span>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
                 {t("admin.dashboard")}
               </Button>
             </Link>
@@ -134,14 +105,7 @@ export default function Navigation() {
           >
             <div className="space-y-4 py-4">
               {/* Status */}
-              <div className="text-muted-foreground flex items-center justify-between px-4 font-mono text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-primary">&gt;</span>
-                  <span>STATUS:</span>
-                  <span className="text-primary">ONLINE</span>
-                </div>
-                <span>{currentTime}</span>
-              </div>
+
 
               {/* Language */}
               <div className="px-4">
@@ -171,7 +135,8 @@ export default function Navigation() {
               {/* Admin link */}
               <div className="px-4">
                 <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="terminal" className="w-full">
+                  <Button variant="default" className="w-full">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
                     {t("admin.dashboard")}
                   </Button>
                 </Link>

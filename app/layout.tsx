@@ -1,35 +1,35 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { JetBrains_Mono } from "next/font/google"
+import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
 import "./globals.css"
 
-const jetbrainsMono = JetBrains_Mono({
+const inter = Inter({
   subsets: ["latin", "vietnamese"],
-  variable: "--font-mono",
+  variable: "--font-sans",
 })
 
 export const metadata: Metadata = {
-  title: "Terminal Blog | Developer's Journal",
+  title: "Dev Blog | Thoughts & Tutorials",
   description:
-    "A developer-focused blog with terminal aesthetic. Tutorials, insights, and tech stories.",
-  keywords: ["blog", "developer", "programming", "terminal", "tech", "tutorials"],
-  authors: [{ name: "Terminal Blog" }],
-  creator: "Terminal Blog",
+    "A clean, minimalist blog for developers. Sharing insights, tutorials, and tech stories.",
+  keywords: ["blog", "developer", "programming", "tech", "tutorials"],
+  authors: [{ name: "Dev Blog" }],
+  creator: "Dev Blog",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "Terminal Blog",
-    title: "Terminal Blog | Developer's Journal",
-    description: "A developer-focused blog with terminal aesthetic",
+    siteName: "Dev Blog",
+    title: "Dev Blog | Thoughts & Tutorials",
+    description: "A clean, minimalist blog for developers",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Terminal Blog | Developer's Journal",
-    description: "A developer-focused blog with terminal aesthetic",
+    title: "Dev Blog | Thoughts & Tutorials",
+    description: "A clean, minimalist blog for developers",
   },
   icons: {
     icon: [
@@ -56,8 +56,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`font-mono antialiased ${jetbrainsMono.variable}`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`font-sans antialiased ${inter.variable} bg-background text-foreground`}>
         <LanguageProvider>
           <BlogProvider>{children}</BlogProvider>
         </LanguageProvider>

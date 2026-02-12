@@ -42,14 +42,10 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="border-border bg-card/80 border p-8 text-center">
-          <Loader2 className="text-primary mx-auto mb-4 h-8 w-8 animate-spin" />
-          <p className="text-muted-foreground font-mono text-sm">
-            <span className="text-primary">$</span>{" "}
-            {language === "en" ? "Loading posts..." : "Đang tải bài viết..."}
-            <span className="animate-pulse">_</span>
-          </p>
-        </div>
+        <Loader2 className="text-primary mb-4 h-8 w-8 animate-spin" />
+        <p className="text-muted-foreground text-sm font-medium">
+          {language === "en" ? "Loading articles..." : "Đang tải bài viết..."}
+        </p>
       </div>
     )
   }
@@ -57,112 +53,84 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
   // Error state
   if (error) {
     return (
-      <div className="border-destructive/50 bg-destructive/10 border p-6 text-center">
-        <Terminal className="text-destructive mx-auto mb-4 h-8 w-8" />
-        <p className="text-destructive mb-2 font-mono text-sm">
-          <span className="text-destructive/70">[ERROR]</span>{" "}
-          {language === "en" ? "Failed to load posts" : "Không thể tải bài viết"}
-        </p>
-        <p className="text-muted-foreground font-mono text-xs">{error}</p>
+      <div className="border-destructive/30 bg-destructive/5 rounded-xl border p-6 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+          <span className="text-2xl text-destructive">!</span>
+        </div>
+        <h3 className="text-destructive mb-2 font-semibold">
+          {language === "en" ? "Unable to load content" : "Không thể tải nội dung"}
+        </h3>
+        <p className="text-muted-foreground text-sm">{error}</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Search and filter section */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="border-border bg-card/50 border backdrop-blur-sm"
+        className="bg-card rounded-2xl border border-border p-1 shadow-sm"
       >
-        {/* Terminal header */}
-        <div className="border-border bg-muted/30 flex items-center gap-2 border-b px-4 py-2">
-          <div className="flex items-center gap-1.5">
-            <div className="bg-destructive/60 h-2.5 w-2.5 rounded-full" />
-            <div className="bg-accent/60 h-2.5 w-2.5 rounded-full" />
-            <div className="bg-primary/60 h-2.5 w-2.5 rounded-full" />
+        <div className="flex flex-col md:flex-row gap-2 p-2">
+          {/* Search input */}
+          <div className="relative flex-1">
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Input
+              placeholder={t("blog.search")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10 border-transparent bg-muted/30 focus-visible:bg-background"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-          <div className="flex flex-1 items-center justify-center gap-2">
-            <Filter className="text-muted-foreground h-3 w-3" />
-            <span className="text-muted-foreground font-mono text-xs">search.sh</span>
-          </div>
+
+          {/* Tags filter toggle or list could go here if crowded, but fitting inline for now */}
         </div>
 
-        {/* Search content */}
-        <div className="space-y-4 p-4">
-          {/* Search input */}
-          <div className="flex items-center gap-2">
-            <span className="text-primary font-mono text-sm">$</span>
-            <span className="text-muted-foreground font-mono text-sm">grep -i</span>
-            <div className="relative flex-1">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
-                placeholder={t("blog.search")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Tags filter */}
-          {allTags.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-muted-foreground flex items-center gap-2 font-mono text-xs">
-                <Tag className="text-secondary h-3 w-3" />
-                <span>{language === "en" ? "filter --tag" : "lọc --thẻ"}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {allTags.map((tag) => (
-                  <Button
-                    key={tag}
-                    variant={selectedTag === tag ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                    className="text-xs"
-                  >
-                    #{tag}
-                    {selectedTag === tag && <X className="ml-1.5 h-3 w-3" />}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Active filters summary */}
-          {(searchQuery || selectedTag) && (
-            <div className="border-border flex items-center gap-2 border-t pt-2">
-              <span className="text-muted-foreground font-mono text-xs">
-                <span className="text-secondary">//</span> {filteredPosts.length}{" "}
-                {language === "en" ? "results found" : "kết quả"}
+        {/* Tags filter */}
+        {allTags.length > 0 && (
+          <div className="border-t border-border/50 px-4 py-3">
+            <div className="flex flex-wrap gap-2">
+              <span className="text-xs font-medium text-muted-foreground py-1.5 mr-1">
+                {language === "en" ? "Topics:" : "Chủ đề:"}
               </span>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition-colors font-medium ${selectedTag === tag
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                >
+                  {tag}
+                </button>
+              ))}
               {(searchQuery || selectedTag) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => {
                     setSearchQuery("")
                     setSelectedTag(null)
                   }}
-                  className="h-6 px-2 text-xs"
+                  className="ml-auto text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 px-2"
                 >
-                  <X className="mr-1 h-3 w-3" />
-                  {language === "en" ? "Clear" : "Xóa"}
-                </Button>
+                  <Filter className="h-3 w-3" />
+                  {language === "en" ? "Reset" : "Đặt lại"}
+                </button>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Posts grid */}
@@ -170,20 +138,20 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="border-border bg-card/50 border p-12 text-center"
+          className="text-center py-20 border-2 border-dashed border-border rounded-2xl"
         >
-          <Terminal className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-          <p className="text-muted-foreground font-mono text-sm">
-            <span className="text-primary">$</span> {t("blog.noResults")}
-          </p>
-          <p className="text-muted-foreground/60 mt-2 font-mono text-xs">
+          <Search className="text-muted-foreground/50 mx-auto mb-4 h-12 w-12" />
+          <h3 className="text-lg font-semibold text-foreground mb-1">
+            {t("blog.noResults")}
+          </h3>
+          <p className="text-muted-foreground text-sm">
             {language === "en"
-              ? "Try adjusting your search or filters"
-              : "Thử điều chỉnh tìm kiếm hoặc bộ lọc"}
+              ? "Try adjusting your search terms or filters"
+              : "Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc"}
           </p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatePresence mode="popLayout">
             {filteredPosts.map((post, index) => (
               <BlogCard key={post.id} post={post} language={language} index={index} />
@@ -194,20 +162,13 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
 
       {/* Results count footer */}
       {filteredPosts.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="pt-4 text-center"
-        >
-          <p className="text-muted-foreground font-mono text-xs">
-            <span className="text-primary">$</span> echo &quot;
+        <div className="text-center pt-8 pb-4">
+          <p className="text-sm text-muted-foreground">
             {language === "en"
-              ? `Showing ${filteredPosts.length} posts`
+              ? `Showing ${filteredPosts.length} articles`
               : `Hiển thị ${filteredPosts.length} bài viết`}
-            &quot;
           </p>
-        </motion.div>
+        </div>
       )}
     </div>
   )
