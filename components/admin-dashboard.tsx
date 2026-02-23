@@ -4,7 +4,8 @@ import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Settings, FileText, PenLine, Terminal, Activity, Database, Cpu } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Settings, FileText, PenLine, Terminal, Activity, Database, Cpu, LogOut } from "lucide-react"
 
 import Navigation from "./navigation"
 import AdminPostForm from "./admin-post-form"
@@ -12,10 +13,19 @@ import AdminPostsList from "./admin-posts-list"
 import AdminComments from "./admin-comments"
 import AnimatedGradientBackdrop from "./animated-gradient-backdrop"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const { language, t } = useLanguage()
   const { posts } = useBlog()
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/admin/login")
+    router.refresh()
+  }
 
   // Stats for dashboard overview
   const totalPosts = posts.length
@@ -49,7 +59,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="bg-background text-foreground relative min-h-screen overflow-hidden">
-      <AnimatedGradientBackdrop showMatrix={false} showGrid={true} showScanlines={true} />
+      <AnimatedGradientBackdrop />
       <Navigation />
 
       <main className="relative z-10 container mx-auto px-4 pt-24 pb-16">
@@ -92,12 +102,22 @@ export default function AdminDashboard() {
                       : "Quản lý các bài viết blog và nội dung của bạn"}
                   </p>
                 </div>
-                <Link href="/admin/settings">
-                  <Button variant="outline" className="gap-2 font-mono text-xs">
-                    <Settings className="h-4 w-4" />
-                    {language === "en" ? "config" : "cấu hình"}
+                <div className="flex items-center gap-2">
+                  <Link href="/admin/settings">
+                    <Button variant="outline" className="gap-2 font-mono text-xs">
+                      <Settings className="h-4 w-4" />
+                      {language === "en" ? "config" : "cấu hình"}
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="gap-2 font-mono text-xs"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {language === "en" ? "logout" : "đăng xuất"}
                   </Button>
-                </Link>
+                </div>
               </div>
             </div>
           </div>

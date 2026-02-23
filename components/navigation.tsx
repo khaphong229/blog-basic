@@ -6,6 +6,7 @@ import { Code2, Menu, X, LayoutDashboard } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
+import ThemeToggle from "@/components/theme-toggle"
 import Link from "next/link"
 
 export default function Navigation() {
@@ -31,8 +32,8 @@ export default function Navigation() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${isScrolled
-          ? "bg-background/80 border-border border-b shadow-sm backdrop-blur-md"
-          : "bg-transparent"
+        ? "bg-background/80 border-border border-b shadow-sm backdrop-blur-md"
+        : "bg-transparent"
         }`}
     >
       <div className="container mx-auto px-4">
@@ -76,7 +77,9 @@ export default function Navigation() {
               </Button>
             </div>
 
-            {/* Admin link */}
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* Admin link */}
             <Link href="/admin">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">

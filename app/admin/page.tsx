@@ -1,13 +1,8 @@
-import { LanguageProvider } from "@/context/language-context"
-import { BlogProvider } from "@/context/blog-context"
 import AdminDashboard from "@/components/admin-dashboard"
 
+/**
+ * Admin page — no extra providers needed (already in layout.tsx)
+ */
 export default function Page() {
-  return (
-    <LanguageProvider>
-      <BlogProvider>
-        <AdminDashboard />
-      </BlogProvider>
-    </LanguageProvider>
-  )
+  return <AdminDashboard />
 }

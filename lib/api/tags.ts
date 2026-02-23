@@ -1,10 +1,11 @@
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 import type { Tag, TagInsert, TagUpdate, Language } from "@/lib/supabase"
 
 /**
  * Get all tags
  */
 export async function getAllTags(): Promise<Tag[]> {
+  const supabase = createClient()
   const { data, error } = await supabase.from("tags").select("*").order("slug", { ascending: true })
 
   if (error) throw error
@@ -15,6 +16,7 @@ export async function getAllTags(): Promise<Tag[]> {
  * Get tag by slug
  */
 export async function getTagBySlug(slug: string): Promise<Tag | null> {
+  const supabase = createClient()
   const { data, error } = await supabase.from("tags").select("*").eq("slug", slug).single()
 
   if (error) {
@@ -29,6 +31,7 @@ export async function getTagBySlug(slug: string): Promise<Tag | null> {
  * Get tag by ID
  */
 export async function getTagById(id: string): Promise<Tag | null> {
+  const supabase = createClient()
   const { data, error } = await supabase.from("tags").select("*").eq("id", id).single()
 
   if (error) {
@@ -43,6 +46,7 @@ export async function getTagById(id: string): Promise<Tag | null> {
  * Create a new tag
  */
 export async function createTag(tag: TagInsert): Promise<Tag> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("tags")
     .insert(tag as never)
@@ -57,6 +61,7 @@ export async function createTag(tag: TagInsert): Promise<Tag> {
  * Update a tag
  */
 export async function updateTag(id: string, updates: TagUpdate): Promise<Tag> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("tags")
     .update(updates as never)
@@ -72,6 +77,7 @@ export async function updateTag(id: string, updates: TagUpdate): Promise<Tag> {
  * Delete a tag
  */
 export async function deleteTag(id: string): Promise<void> {
+  const supabase = createClient()
   const { error } = await supabase.from("tags").delete().eq("id", id)
   if (error) throw error
 }
@@ -96,6 +102,8 @@ export async function getOrCreateTag(slug: string, nameVi: string, nameEn: strin
 export async function getTagsWithPostCount(
   language: Language
 ): Promise<(Tag & { post_count: number })[]> {
+  const supabase = createClient()
+
   // Get all published posts for this language
   const { data: posts, error: postsError } = await supabase
     .from("posts")

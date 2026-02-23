@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 import type {
   UrlShortenerConfig,
   UrlShortenerConfigInsert,
@@ -18,6 +18,7 @@ import type {
  * Get URL shortener config for a language
  */
 export async function getUrlConfig(language: Language): Promise<UrlShortenerConfig | null> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("url_shortener_config")
     .select("*")
@@ -39,6 +40,7 @@ export async function getAllUrlConfigs(): Promise<{
   en: UrlShortenerConfig | null
   vi: UrlShortenerConfig | null
 }> {
+  const supabase = createClient()
   const { data, error } = await supabase.from("url_shortener_config").select("*")
 
   if (error) throw error
@@ -57,6 +59,7 @@ export async function getAllUrlConfigs(): Promise<{
 export async function upsertUrlConfig(
   config: UrlShortenerConfigInsert
 ): Promise<UrlShortenerConfig> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("url_shortener_config")
     .upsert(config as never, { onConflict: "language" })
@@ -74,6 +77,7 @@ export async function updateUrlConfig(
   language: Language,
   updates: UrlShortenerConfigUpdate
 ): Promise<UrlShortenerConfig> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("url_shortener_config")
     .update(updates as never)
@@ -93,6 +97,7 @@ export async function updateUrlConfig(
  * Get shortened URL by post ID
  */
 export async function getShortenedUrlByPost(postId: string): Promise<ShortenedUrl | null> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("shortened_urls")
     .select("*")
@@ -111,6 +116,7 @@ export async function getShortenedUrlByPost(postId: string): Promise<ShortenedUr
  * Get shortened URL by short code
  */
 export async function getShortenedUrlByCode(shortCode: string): Promise<ShortenedUrl | null> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("shortened_urls")
     .select("*")
@@ -129,6 +135,7 @@ export async function getShortenedUrlByCode(shortCode: string): Promise<Shortene
  * Create a shortened URL
  */
 export async function createShortenedUrl(url: ShortenedUrlInsert): Promise<ShortenedUrl> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("shortened_urls")
     .insert(url as never)
@@ -143,6 +150,7 @@ export async function createShortenedUrl(url: ShortenedUrlInsert): Promise<Short
  * Increment click count for a shortened URL
  */
 export async function incrementClickCount(urlId: string): Promise<void> {
+  const supabase = createClient()
   const { data: url, error: fetchError } = await supabase
     .from("shortened_urls")
     .select("clicks")
@@ -165,6 +173,7 @@ export async function incrementClickCount(urlId: string): Promise<void> {
  * Get all shortened URLs
  */
 export async function getAllShortenedUrls(): Promise<ShortenedUrl[]> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("shortened_urls")
     .select("*")
@@ -182,6 +191,7 @@ export async function getAllShortenedUrls(): Promise<ShortenedUrl[]> {
  * Add a URL shortener log
  */
 export async function addUrlLog(log: UrlShortenerLogInsert): Promise<UrlShortenerLog> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("url_shortener_logs")
     .insert(log as never)
@@ -199,6 +209,7 @@ export async function getRecentUrlLogs(
   language?: Language,
   limit: number = 10
 ): Promise<UrlShortenerLog[]> {
+  const supabase = createClient()
   let query = supabase
     .from("url_shortener_logs")
     .select("*")

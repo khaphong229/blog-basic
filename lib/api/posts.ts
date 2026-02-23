@@ -1,10 +1,11 @@
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 import type { Post, PostInsert, PostUpdate, PostWithTags, Language, Tag } from "@/lib/supabase"
 
 /**
  * Get all published posts by language
  */
 export async function getPublishedPosts(language: Language): Promise<PostWithTags[]> {
+  const supabase = createClient()
   const { data: posts, error } = await supabase
     .from("posts")
     .select("*")
@@ -33,6 +34,7 @@ export async function getPostBySlug(
   slug: string,
   language: Language
 ): Promise<PostWithTags | null> {
+  const supabase = createClient()
   const { data: post, error } = await supabase
     .from("posts")
     .select("*")
@@ -54,6 +56,7 @@ export async function getPostBySlug(
  * Get tags for a post
  */
 export async function getPostTags(postId: string): Promise<Tag[]> {
+  const supabase = createClient()
   const { data, error } = await supabase.from("post_tags").select("tag_id").eq("post_id", postId)
 
   if (error) throw error
@@ -71,6 +74,7 @@ export async function getPostTags(postId: string): Promise<Tag[]> {
  * Get all posts (for admin)
  */
 export async function getAllPosts(language?: Language): Promise<PostWithTags[]> {
+  const supabase = createClient()
   let query = supabase.from("posts").select("*").order("created_at", { ascending: false })
 
   if (language) {
@@ -96,6 +100,7 @@ export async function getAllPosts(language?: Language): Promise<PostWithTags[]> 
  * Create a new post
  */
 export async function createPost(post: PostInsert, tagIds: string[]): Promise<Post> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("posts")
     .insert(post as never)
@@ -125,6 +130,7 @@ export async function updatePost(
   updates: PostUpdate,
   tagIds?: string[]
 ): Promise<Post> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("posts")
     .update(updates as never)
@@ -153,6 +159,7 @@ export async function updatePost(
  * Delete a post
  */
 export async function deletePost(id: string): Promise<void> {
+  const supabase = createClient()
   const { error } = await supabase.from("posts").delete().eq("id", id)
   if (error) throw error
 }
@@ -161,6 +168,7 @@ export async function deletePost(id: string): Promise<void> {
  * Increment view count
  */
 export async function incrementViewCount(postId: string): Promise<void> {
+  const supabase = createClient()
   const { data: post, error: fetchError } = await supabase
     .from("posts")
     .select("view_count")
@@ -183,6 +191,7 @@ export async function incrementViewCount(postId: string): Promise<void> {
  * Search posts by title/excerpt
  */
 export async function searchPosts(query: string, language: Language): Promise<PostWithTags[]> {
+  const supabase = createClient()
   const { data: posts, error } = await supabase
     .from("posts")
     .select("*")
@@ -209,6 +218,7 @@ export async function searchPosts(query: string, language: Language): Promise<Po
  * Get posts by tag
  */
 export async function getPostsByTag(tagSlug: string, language: Language): Promise<PostWithTags[]> {
+  const supabase = createClient()
   const { data: tag, error: tagError } = await supabase
     .from("tags")
     .select("id")

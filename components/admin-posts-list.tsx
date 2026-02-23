@@ -5,8 +5,12 @@ import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
 import { Button } from "@/components/ui/button"
 import AdminEditPostDialog from "./admin-edit-post-dialog"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { FileText, Trash2, Calendar, User, Globe } from "lucide-react"
+import { Pagination } from "@/components/ui/pagination"
+
+/** Posts per page in admin list */
+const ADMIN_POSTS_PER_PAGE = 10
 
 interface AdminPostsListProps {
   posts: BlogPost[]
@@ -16,6 +20,13 @@ export default function AdminPostsList({ posts }: AdminPostsListProps) {
   const { language, t } = useLanguage()
   const { deletePost } = useBlog()
   const [editingPostId, setEditingPostId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const totalPages = Math.ceil(posts.length / ADMIN_POSTS_PER_PAGE)
+  const paginatedPosts = useMemo(() => {
+    const start = (currentPage - 1) * ADMIN_POSTS_PER_PAGE
+    return posts.slice(start, start + ADMIN_POSTS_PER_PAGE)
+  }, [posts, currentPage])
 
   if (posts.length === 0) {
     return (
@@ -25,8 +36,8 @@ export default function AdminPostsList({ posts }: AdminPostsListProps) {
           {language === "en" ? "No posts yet" : "Chưa có bài viết nào"}
         </p>
         <p className="text-sm text-muted-foreground/70 mt-1">
-          {language === "en" 
-            ? "Create your first post using the form above" 
+          {language === "en"
+            ? "Create your first post using the form above"
             : "Tạo bài viết đầu tiên bằng form ở trên"}
         </p>
       </div>
@@ -46,9 +57,9 @@ export default function AdminPostsList({ posts }: AdminPostsListProps) {
 
       {/* Table Body */}
       <div className="divide-y divide-border">
-        {posts.map((post) => (
-          <article 
-            key={post.id} 
+        {paginatedPosts.map((post) => (
+          <article
+            key={post.id}
             className="group px-6 py-4 hover:bg-muted/20 transition-colors"
           >
             {/* Desktop Row */}
@@ -66,7 +77,7 @@ export default function AdminPostsList({ posts }: AdminPostsListProps) {
               {/* Author */}
               <div className="col-span-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-[10px] font-medium text-primary">
+                  <div className="w-6 h-6 rounded-full bg-linear-to-br from-primary/20 to-primary/40 flex items-center justify-center text-[10px] font-medium text-primary">
                     {post.author.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-sm text-foreground/80 truncate">{post.author}</span>
@@ -120,7 +131,7 @@ export default function AdminPostsList({ posts }: AdminPostsListProps) {
                     {post.excerpt}
                   </p>
                 </div>
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary flex-shrink-0">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary shrink-0">
                   {post.language === "en" ? "EN" : "VI"}
                 </span>
               </div>
@@ -161,6 +172,22 @@ export default function AdminPostsList({ posts }: AdminPostsListProps) {
           </article>
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="border-t border-border px-6 py-4 flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {language === "en"
+              ? `Showing ${paginatedPosts.length} of ${posts.length} posts`
+              : `Hiển thị ${paginatedPosts.length} / ${posts.length} bài viết`}
+          </p>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   )
 }

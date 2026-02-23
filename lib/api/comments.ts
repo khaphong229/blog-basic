@@ -1,10 +1,11 @@
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 import type { Comment, CommentInsert, CommentStatus } from "@/lib/supabase"
 
 /**
  * Get comments for a post
  */
 export async function getPostComments(postId: string): Promise<Comment[]> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("comments")
     .select("*")
@@ -20,6 +21,7 @@ export async function getPostComments(postId: string): Promise<Comment[]> {
  * Add a comment to a post
  */
 export async function addComment(comment: CommentInsert): Promise<Comment> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("comments")
     .insert(comment as never)
@@ -34,6 +36,7 @@ export async function addComment(comment: CommentInsert): Promise<Comment> {
  * Get all comments (for admin)
  */
 export async function getAllComments(): Promise<(Comment & { post_title?: string })[]> {
+  const supabase = createClient()
   const { data: comments, error } = await supabase
     .from("comments")
     .select("*")
@@ -65,6 +68,7 @@ export async function getAllComments(): Promise<(Comment & { post_title?: string
  * Update comment status (hide/show)
  */
 export async function updateCommentStatus(id: string, status: CommentStatus): Promise<Comment> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from("comments")
     .update({ status } as never)
@@ -80,6 +84,7 @@ export async function updateCommentStatus(id: string, status: CommentStatus): Pr
  * Delete a comment
  */
 export async function deleteComment(id: string): Promise<void> {
+  const supabase = createClient()
   const { error } = await supabase.from("comments").delete().eq("id", id)
   if (error) throw error
 }
@@ -88,6 +93,7 @@ export async function deleteComment(id: string): Promise<void> {
  * Get comment count for a post
  */
 export async function getCommentCount(postId: string): Promise<number> {
+  const supabase = createClient()
   const { count, error } = await supabase
     .from("comments")
     .select("*", { count: "exact", head: true })

@@ -8,9 +8,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { X, Plus, Send, FileText, User, AlignLeft, Tag, AlertCircle, Languages, Loader2 } from "lucide-react"
+import { X, Plus, Send, FileText, User, AlignLeft, Tag, AlertCircle, Languages, Loader2, ImageIcon } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-// import { translatePost } from "@/lib/api/translation" // Moved to context
+import ImageUpload from "@/components/image-upload"
 
 export default function AdminPostForm() {
   const { language, t } = useLanguage()
@@ -25,6 +25,7 @@ export default function AdminPostForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState("")
   const [tags, setTags] = useState<string[]>([])
+  const [featuredImage, setFeaturedImage] = useState<string | null>(null)
 
 
   const handleAddTag = () => {
@@ -70,6 +71,7 @@ export default function AdminPostForm() {
         language,
         tags,
         status: "published",
+        featuredImage,
       })
 
       // Determine success message
@@ -88,6 +90,7 @@ export default function AdminPostForm() {
       setContent("")
       setAuthor("")
       setTags([])
+      setFeaturedImage(null)
       setSuccess(true)
 
       // Hide success message after 4 seconds (slightly longer for dual-post message)
@@ -110,7 +113,7 @@ export default function AdminPostForm() {
   return (
     <Card className="border-border/50 overflow-hidden shadow-sm">
       {/* Header with subtle accent */}
-      <CardHeader className="from-primary/5 via-primary/3 border-border/50 border-b bg-gradient-to-r to-transparent">
+      <CardHeader className="from-primary/5 via-primary/3 border-border/50 border-b bg-linear-to-r to-transparent">
         <div className="flex items-center gap-3">
           <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-xl">
             <FileText className="text-primary h-5 w-5" />
@@ -130,7 +133,7 @@ export default function AdminPostForm() {
         {/* Error Message */}
         {error && (
           <div className="bg-destructive/10 border-destructive/30 mb-6 flex items-center gap-3 rounded-xl border p-4">
-            <AlertCircle className="text-destructive h-5 w-5 flex-shrink-0" />
+            <AlertCircle className="text-destructive h-5 w-5 shrink-0" />
             <p className="text-destructive font-medium">{error}</p>
           </div>
         )}
@@ -138,7 +141,7 @@ export default function AdminPostForm() {
         {/* Success Message */}
         {success && (
           <div className="bg-primary/10 border-primary/30 mb-6 flex items-center gap-3 rounded-xl border p-4">
-            <Send className="text-primary h-5 w-5 flex-shrink-0" />
+            <Send className="text-primary h-5 w-5 shrink-0" />
             <p className="text-primary font-medium">
               {successMessage || (language === "en" ? "Post created successfully!" : "Đã tạo bài viết thành công!")}
             </p>
@@ -217,6 +220,19 @@ export default function AdminPostForm() {
                   : "Viết nội dung bài viết ở đây..."
               }
               rows={12}
+            />
+          </div>
+
+          {/* Featured Image */}
+          <div className="space-y-2">
+            <label className="text-foreground flex items-center gap-2 text-sm font-semibold">
+              <ImageIcon className="text-muted-foreground h-4 w-4" />
+              {language === "en" ? "Featured Image" : "Ảnh đại diện"}
+            </label>
+            <ImageUpload
+              value={featuredImage}
+              onChange={setFeaturedImage}
+              disabled={isSubmitting}
             />
           </div>
 

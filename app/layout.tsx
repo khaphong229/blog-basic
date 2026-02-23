@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
 const inter = Inter({
@@ -58,9 +59,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased ${inter.variable} bg-background text-foreground`}>
-        <LanguageProvider>
-          <BlogProvider>{children}</BlogProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <BlogProvider>{children}</BlogProvider>
+          </LanguageProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

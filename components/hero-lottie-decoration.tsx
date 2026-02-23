@@ -1,30 +1,41 @@
 "use client"
 
-import Lottie from "lottie-react"
+import dynamic from "next/dynamic"
+import { useState, useEffect } from "react"
 import { useReducedMotion } from "framer-motion"
-import logoAnimation from "@/public/Logo.json"
 
 /**
- * HeroLottieDecoration
- * 
- * Decorative Lottie animation for the hero section.
- * - Appears on the right side on desktop (lg+)
- * - Smaller on tablet (md)
- * - Hidden on mobile (sm)
- * - Respects prefers-reduced-motion
+ * Lazy-loaded Lottie component — only downloads when rendered
+ * Logo.json (134KB) is code-split away from initial bundle
  */
+const Lottie = dynamic(() => import("lottie-react"), {
+  ssr: false,
+  loading: () => <div className="w-full h-full animate-pulse bg-muted/20 rounded-full" />,
+})
+
+// Lazy import animation data
+const loadAnimation = () => import("@/public/Logo.json").then((m) => m.default)
 
 interface HeroLottieDecorationProps {
   className?: string
 }
 
-export default function HeroLottieDecoration({ 
-  className = "" 
+export default function HeroLottieDecoration({
+  className = ""
 }: HeroLottieDecorationProps) {
   const prefersReducedMotion = useReducedMotion()
 
+  // Load animation data lazily
+  const [animationData, setAnimationData] = useState<unknown>(null)
+
+  useEffect(() => {
+    loadAnimation().then(setAnimationData)
+  }, [])
+
+  if (!animationData) return null
+
   return (
-    <div 
+    <div
       className={`
         hidden md:block
         absolute right-0 top-1/2 -translate-y-1/2
@@ -37,8 +48,8 @@ export default function HeroLottieDecoration({
       `}
       aria-hidden="true"
     >
-      <Lottie 
-        animationData={logoAnimation}
+      <Lottie
+        animationData={animationData}
         loop={!prefersReducedMotion}
         autoplay={!prefersReducedMotion}
         style={{ width: "100%", height: "100%" }}

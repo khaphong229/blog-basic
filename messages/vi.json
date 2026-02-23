@@ -1,0 +1,83 @@
+{
+    "nav": {
+        "home": "Trang chủ",
+        "about": "Về chúng tôi",
+        "contact": "Liên hệ"
+    },
+    "home": {
+        "title": "Chào mừng đến Blog của chúng tôi",
+        "subtitle": "Khám phá các bài viết và câu chuyện sâu sắc",
+        "language": "Ngôn ngữ",
+        "selectLanguage": "Chọn Ngôn ngữ",
+        "hero": {
+            "badge": "Đang đọc: Thiết kế hệ thống v2.0",
+            "heading": "Suy nghĩ, Câu chuyện & Ý tưởng.",
+            "description": "Bộ sưu tập các bài viết về kỹ thuật phần mềm, design patterns và tương lai của công nghệ.",
+            "cta": "Bắt đầu đọc",
+            "portfolio": "Hồ sơ năng lực"
+        },
+        "stats": {
+            "articles": "Bài viết",
+            "articleDesc": "Hướng dẫn kỹ thuật",
+            "topics": "Chủ đề",
+            "topicDesc": "Từ giao diện đến hệ thống",
+            "updates": "Cập nhật",
+            "updateDesc": "Tin tức công nghệ mới"
+        },
+        "latestPosts": "Bài viết mới nhất"
+    },
+    "blog": {
+        "allPosts": "Tất cả Bài viết",
+        "noResults": "Không tìm thấy bài viết",
+        "readMore": "Đọc thêm",
+        "by": "Bởi",
+        "on": "vào",
+        "comments": "Bình luận",
+        "leaveComment": "Để lại bình luận",
+        "yourName": "Tên của bạn",
+        "yourEmail": "Email của bạn",
+        "comment": "Bình luận",
+        "submit": "Gửi",
+        "search": "Tìm kiếm bài viết...",
+        "backToBlog": "Trở lại danh sách",
+        "minRead": "phút đọc",
+        "shareArticle": "Chia sẻ bài viết này",
+        "copyLink": "Sao chép Link",
+        "copied": "Đã sao chép",
+        "loading": "Đang tải bài viết...",
+        "unableToLoad": "Không thể tải nội dung",
+        "noResultsHint": "Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc",
+        "showingArticles": "Hiển thị {count} bài viết",
+        "topics": "Chủ đề:",
+        "reset": "Đặt lại",
+        "postNotFound": "Không tìm thấy bài viết",
+        "articleNotFound": "Không tìm thấy bài viết",
+        "articleNotFoundDesc": "Bài viết bạn tìm không tồn tại hoặc đã bị xóa."
+    },
+    "admin": {
+        "dashboard": "Bảng điều khiển",
+        "newPost": "Bài viết Mới",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa",
+        "title": "Tiêu đề",
+        "content": "Nội dung",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "logout": "Đăng xuất"
+    },
+    "comment": {
+        "success": "Bình luận đã gửi! Sẽ hiển thị sau khi duyệt.",
+        "submitting": "Đang gửi...",
+        "noComments": "Chưa có bình luận. Hãy là người đầu tiên chia sẻ suy nghĩ!"
+    },
+    "error": {
+        "somethingWentWrong": "Đã xảy ra lỗi",
+        "tryAgain": "Thử lại",
+        "backToHome": "Về trang chủ",
+        "pageNotFound": "Không tìm thấy trang",
+        "pageNotFoundDesc": "Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển."
+    },
+    "footer": {
+        "copyright": "© 2024 Xây dựng với Next.js & Tailwind"
+    }
+}

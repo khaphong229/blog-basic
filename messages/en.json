@@ -1,0 +1,83 @@
+{
+    "nav": {
+        "home": "Home",
+        "about": "About",
+        "contact": "Contact"
+    },
+    "home": {
+        "title": "Welcome to Our Blog",
+        "subtitle": "Discover insightful articles and stories",
+        "language": "Language",
+        "selectLanguage": "Select Language",
+        "hero": {
+            "badge": "Now reading: System Design v2.0",
+            "heading": "Thoughts, Stories & Ideas.",
+            "description": "A curated collection of thoughts on software engineering, design patterns, and the future of technology.",
+            "cta": "Start Reading",
+            "portfolio": "Portfolio"
+        },
+        "stats": {
+            "articles": "Articles",
+            "articleDesc": "Technical tutorials",
+            "topics": "Topics",
+            "topicDesc": "From frontend to system",
+            "updates": "Updates",
+            "updateDesc": "Latest tech news"
+        },
+        "latestPosts": "Latest Posts"
+    },
+    "blog": {
+        "allPosts": "All Posts",
+        "noResults": "No posts found",
+        "readMore": "Read More",
+        "by": "By",
+        "on": "on",
+        "comments": "Comments",
+        "leaveComment": "Leave a Comment",
+        "yourName": "Your Name",
+        "yourEmail": "Your Email",
+        "comment": "Comment",
+        "submit": "Submit",
+        "search": "Search posts...",
+        "backToBlog": "Back to blog",
+        "minRead": "min read",
+        "shareArticle": "Share this article",
+        "copyLink": "Copy Link",
+        "copied": "Copied",
+        "loading": "Loading articles...",
+        "unableToLoad": "Unable to load content",
+        "noResultsHint": "Try adjusting your search terms or filters",
+        "showingArticles": "Showing {count} articles",
+        "topics": "Topics:",
+        "reset": "Reset",
+        "postNotFound": "Post Not Found",
+        "articleNotFound": "Article Not Found",
+        "articleNotFoundDesc": "The article you're looking for doesn't exist or has been removed."
+    },
+    "admin": {
+        "dashboard": "Admin Dashboard",
+        "newPost": "New Post",
+        "edit": "Edit",
+        "delete": "Delete",
+        "title": "Title",
+        "content": "Content",
+        "save": "Save",
+        "cancel": "Cancel",
+        "logout": "Logout"
+    },
+    "comment": {
+        "success": "Comment submitted! It will appear after review.",
+        "submitting": "Submitting...",
+        "noComments": "No comments yet. Be the first to share your thoughts!"
+    },
+    "error": {
+        "somethingWentWrong": "Something went wrong",
+        "tryAgain": "Try Again",
+        "backToHome": "Back to Home",
+        "pageNotFound": "Page Not Found",
+        "pageNotFoundDesc": "The page you're looking for doesn't exist or has been moved."
+    },
+    "footer": {
+        "copyright": "© 2024 Built with Next.js & Tailwind"
+    }
+}

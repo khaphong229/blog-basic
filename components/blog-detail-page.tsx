@@ -29,7 +29,7 @@ export default function BlogDetailPage({ slug }: BlogDetailPageProps) {
   if (!post) {
     return (
       <div className="bg-background text-foreground relative min-h-screen overflow-hidden">
-        <AnimatedGradientBackdrop showMatrix={false} showGrid={true} showScanlines={true} />
+        <AnimatedGradientBackdrop />
         <Navigation />
         <main className="relative z-10 container mx-auto px-4 py-24">
           <motion.div
@@ -70,7 +70,7 @@ export default function BlogDetailPage({ slug }: BlogDetailPageProps) {
                 </p>
 
                 <Link href="/">
-                  <Button variant="terminal">{language === "en" ? "cd ~" : "về trang chủ"}</Button>
+                  <Button variant="outline">{language === "en" ? "cd ~" : "về trang chủ"}</Button>
                 </Link>
               </div>
 
@@ -91,7 +91,7 @@ export default function BlogDetailPage({ slug }: BlogDetailPageProps) {
 
   return (
     <div className="bg-background text-foreground relative min-h-screen overflow-hidden">
-      <AnimatedGradientBackdrop showMatrix={false} showGrid={true} showScanlines={true} />
+      <AnimatedGradientBackdrop />
       <Navigation />
 
       {/* Main content */}

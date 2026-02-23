@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, X, Loader2, Terminal, Tag, Filter } from "lucide-react"
 
@@ -10,6 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { BlogCard } from "@/components/ui/blog-card"
+import { Pagination } from "@/components/ui/pagination"
+
+/** Number of posts per page */
+const POSTS_PER_PAGE = 9
 
 interface BlogListingProps {
   searchQuery: string
@@ -20,6 +24,7 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
   const { language, t } = useLanguage()
   const { searchPosts, getAllTags, getPostsByTag, isLoading, error } = useBlog()
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const allTags = useMemo(() => {
     return getAllTags(language)
@@ -37,6 +42,18 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
 
     return results
   }, [searchQuery, language, searchPosts, selectedTag, getPostsByTag])
+
+  // Pagination: slice filtered posts
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
+  const paginatedPosts = useMemo(() => {
+    const start = (currentPage - 1) * POSTS_PER_PAGE
+    return filteredPosts.slice(start, start + POSTS_PER_PAGE)
+  }, [filteredPosts, currentPage])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedTag, language])
 
   // Loading state
   if (isLoading) {
@@ -109,8 +126,8 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
                   key={tag}
                   onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                   className={`text-xs px-3 py-1.5 rounded-full transition-colors font-medium ${selectedTag === tag
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
                 >
                   {tag}
@@ -153,11 +170,21 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatePresence mode="popLayout">
-            {filteredPosts.map((post, index) => (
+            {paginatedPosts.map((post, index) => (
               <BlogCard key={post.id} post={post} language={language} index={index} />
             ))}
           </AnimatePresence>
         </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          className="pt-4"
+        />
       )}
 
       {/* Results count footer */}
@@ -165,8 +192,8 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
         <div className="text-center pt-8 pb-4">
           <p className="text-sm text-muted-foreground">
             {language === "en"
-              ? `Showing ${filteredPosts.length} articles`
-              : `Hiển thị ${filteredPosts.length} bài viết`}
+              ? `Showing ${paginatedPosts.length} of ${filteredPosts.length} articles`
+              : `Hiển thị ${paginatedPosts.length} / ${filteredPosts.length} bài viết`}
           </p>
         </div>
       )}
