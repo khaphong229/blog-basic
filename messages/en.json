@@ -77,6 +77,17 @@
         "pageNotFound": "Page Not Found",
         "pageNotFoundDesc": "The page you're looking for doesn't exist or has been moved."
     },
+    "tiktok": {
+        "title": "Find Article",
+        "subtitle": "Enter the code from TikTok video",
+        "placeholder": "e.g. 101",
+        "searching": "Searching...",
+        "notFound": "No article found with this code",
+        "recentPosts": "Recent Posts",
+        "code": "Code",
+        "readPost": "Read article",
+        "enterCode": "Enter code"
+    },
     "footer": {
         "copyright": "© 2024 Built with Next.js & Tailwind"
     }

@@ -34,6 +34,8 @@ export interface Post {
   created_at: string
   updated_at: string
   linked_post_id: string | null
+  /** TikTok video reference code (shared between VI/EN linked posts) */
+  tiktok_code: number | null
 }
 
 export interface Tag {
@@ -97,11 +99,12 @@ export interface UrlShortenerLog {
 // Insert Types (for creating new records)
 // ===========================================
 
-export type PostInsert = Omit<Post, "id" | "view_count" | "created_at" | "updated_at"> & {
+export type PostInsert = Omit<Post, "id" | "view_count" | "created_at" | "updated_at" | "tiktok_code"> & {
   id?: string
   view_count?: number
   created_at?: string
   updated_at?: string
+  tiktok_code?: number | null
 }
 
 export type TagInsert = Omit<Tag, "id" | "created_at"> & {

@@ -77,6 +77,17 @@
         "pageNotFound": "Không tìm thấy trang",
         "pageNotFoundDesc": "Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển."
     },
+    "tiktok": {
+        "title": "Tìm bài viết",
+        "subtitle": "Nhập mã số từ video TikTok",
+        "placeholder": "Ví dụ: 101",
+        "searching": "Đang tìm...",
+        "notFound": "Không tìm thấy bài viết với mã này",
+        "recentPosts": "Bài viết gần đây",
+        "code": "Mã",
+        "readPost": "Đọc bài viết",
+        "enterCode": "Nhập mã số"
+    },
     "footer": {
         "copyright": "© 2024 Xây dựng với Next.js & Tailwind"
     }

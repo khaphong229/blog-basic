@@ -52,6 +52,7 @@ function mapSupabasePostToBlogPost(post: PostWithTags, comments: Comment[] = [])
         seoDescription: post.seo_description,
         featuredImage: post.featured_image,
         linkedPostId: post.linked_post_id,
+        tiktokCode: post.tiktok_code,
     }
 }
 
@@ -256,6 +257,12 @@ export function PostsProvider({ children }: { children: ReactNode }) {
 
                 const enPostId = (enPost as { id: string }).id
                 await supabase.from("posts").update({ linked_post_id: enPostId } as never).eq("id", newPostId)
+
+                // Copy tiktok_code from VI post to EN post (shared code)
+                const viTiktokCode = (newPost as { tiktok_code: number | null }).tiktok_code
+                if (viTiktokCode) {
+                    await supabase.from("posts").update({ tiktok_code: viTiktokCode } as never).eq("id", enPostId)
+                }
 
                 if (translationResult.translatedTags?.length > 0) {
                     await handleTags(enPostId, translationResult.translatedTags)

@@ -38,6 +38,8 @@ export interface BlogPost {
   featuredImage?: string | null
   /** ID of linked translated post */
   linkedPostId?: string | null
+  /** TikTok video reference code (shared between VI/EN linked posts) */
+  tiktokCode?: number | null
 }
 
 export interface URLShortenerConfig {
