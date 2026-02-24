@@ -8,10 +8,6 @@ import {
   ArrowLeft,
   Clock,
   Calendar,
-  User,
-  Terminal,
-  FileCode,
-  Share2,
   Copy,
   Check,
 } from "lucide-react"
@@ -19,17 +15,21 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import UrlShortener from "./url-shortener"
+import TableOfContents from "@/components/table-of-contents"
 
+/**
+ * Blog post detail view — Chameleon.io inspired layout.
+ * Features: sticky TOC sidebar (desktop), clean article typography, share actions.
+ */
 interface BlogPostDetailProps {
   post: BlogPost
 }
 
 export default function BlogPostDetail({ post }: BlogPostDetailProps) {
-  const { language, t } = useLanguage()
+  const { language } = useLanguage()
   const [copied, setCopied] = useState(false)
 
-  // Calculate reading time (rough estimate: 200 words per minute)
+  /** Calculate reading time (approx 200 words per minute) */
   const wordCount = post.content.replace(/<[^>]*>/g, "").split(/\s+/).length
   const readingTime = Math.max(1, Math.ceil(wordCount / 200))
 
@@ -39,6 +39,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
     day: "numeric",
   })
 
+  /** Copy URL to clipboard */
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
@@ -50,11 +51,11 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
   }
 
   return (
-    <motion.article
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="mx-auto max-w-3xl px-4 py-8"
+      className="mx-auto max-w-6xl px-4 py-8"
     >
       {/* Back navigation */}
       <nav className="mb-8">
@@ -67,8 +68,8 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         </Link>
       </nav>
 
-      {/* Header */}
-      <header className="mb-10 text-center">
+      {/* Article header — full width */}
+      <header className="mb-10 max-w-3xl mx-auto text-center">
         {post.tags && post.tags.length > 0 && (
           <div className="flex justify-center flex-wrap gap-2 mb-6">
             {post.tags.map((tag) => (
@@ -79,7 +80,7 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
           </div>
         )}
 
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
+        <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
           {post.title}
         </h1>
 
@@ -103,53 +104,65 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         </div>
       </header>
 
-      {/* Featured Image (if available) - Optional if we want to display it in detail */}
+      {/* Featured Image */}
       {post.featuredImage && (
-        <div className="mb-10 rounded-2xl overflow-hidden shadow-md">
+        <div className="mb-10 max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-md">
           <img src={post.featuredImage} alt={post.title} className="w-full h-auto object-cover" />
         </div>
       )}
 
-      {/* Article content */}
-      <div className="prose prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm max-w-none">
-        <div dangerouslySetInnerHTML={{ __html: post.content }} />
-      </div>
+      {/* 2-Column Layout: TOC Sidebar + Article Content */}
+      <div className="flex gap-10 max-w-6xl mx-auto">
+        {/* Sticky TOC Sidebar — desktop only */}
+        <aside className="hidden xl:block w-56 shrink-0">
+          <div className="sticky top-24">
+            <TableOfContents content={post.content} />
+          </div>
+        </aside>
 
-      {/* Footer / Share */}
-      <footer className="mt-16 pt-8 border-t border-border">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground font-medium">
-            {language === "en" ? "Share this article" : "Chia sẻ bài viết này"}
+        {/* Article Content */}
+        <article className="flex-1 max-w-3xl mx-auto min-w-0">
+          <div className="prose prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
           </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full gap-2"
-              onClick={copyToClipboard}
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? (language === "en" ? "Copied" : "Đã sao chép") : (language === "en" ? "Copy Link" : "Sao chép Link")}
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full"
-              onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`, "_blank")}
-            >
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full"
-              onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, "_blank")}
-            >
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
-            </Button>
-          </div>
-        </div>
-      </footer>
-    </motion.article>
+
+          {/* Footer / Share */}
+          <footer className="mt-16 pt-8 border-t border-border">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-muted-foreground font-medium">
+                {language === "en" ? "Share this article" : "Chia sẻ bài viết này"}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full gap-2"
+                  onClick={copyToClipboard}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? (language === "en" ? "Copied" : "Đã sao chép") : (language === "en" ? "Copy Link" : "Sao chép Link")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`, "_blank")}
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, "_blank")}
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                </Button>
+              </div>
+            </div>
+          </footer>
+        </article>
+      </div>
+    </motion.div>
   )
 }

@@ -4,7 +4,7 @@ import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
 import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, X, Loader2, Terminal, Tag, Filter } from "lucide-react"
+import { Search, X, Loader2, Filter } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"

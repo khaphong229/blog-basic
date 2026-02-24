@@ -2,30 +2,30 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Code2, Menu, X, LayoutDashboard } from "lucide-react"
+import { Menu, X, LayoutDashboard } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/context/language-context"
 import ThemeToggle from "@/components/theme-toggle"
 import Link from "next/link"
 
+/**
+ * Main navigation bar — Chameleon.io inspired clean SaaS style.
+ * Features: sticky header, serif brand logo, language toggle, theme toggle.
+ */
 export default function Navigation() {
   const { language, setLanguage, t } = useLanguage()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [currentTime, setCurrentTime] = useState("")
 
-  // Handle scroll effect
   useEffect(() => {
+    /** Track scroll position for header background transition */
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
-  // Time effect removed for clean design
-
 
   return (
     <motion.nav
@@ -38,43 +38,54 @@ export default function Navigation() {
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-80">
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-              <Code2 className="text-primary h-5 w-5" />
+
+          {/* Logo — Serif font for editorial feel */}
+          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <span className="text-sm font-bold text-primary-foreground">D</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-foreground text-lg font-bold tracking-tight">
-                DevBlog
-              </span>
-            </div>
+            <span className="font-serif text-xl font-bold tracking-tight text-foreground">
+              DevBlog
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden items-center gap-6 md:flex">
-            {/* Clean Spacer */}
-            <div className="hidden lg:block" />
+          <div className="hidden items-center gap-1 md:flex">
+            {/* Nav Links */}
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+                {language === "en" ? "Blog" : "Bài viết"}
+              </Button>
+            </Link>
+            <Link href="/tiktok">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+                TikTok
+              </Button>
+            </Link>
 
-            {/* Language selector */}
-            {/* Language selector - Clean style */}
-            <div className="bg-muted/50 flex items-center gap-1 rounded-full p-1">
-              <Button
-                variant={language === "en" ? "default" : "ghost"}
-                size="sm"
+            {/* Separator */}
+            <div className="mx-2 h-5 w-px bg-border" />
+
+            {/* Language selector — pill toggle */}
+            <div className="flex items-center gap-0.5 rounded-full bg-muted/60 p-0.5">
+              <button
                 onClick={() => setLanguage("en")}
-                className={`h-7 rounded-full text-xs px-3 ${language === "en" ? "bg-white text-black shadow-sm hover:bg-white/90" : "hover:bg-transparent"}`}
+                className={`h-7 rounded-full px-3 text-xs font-medium transition-all ${language === "en"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 EN
-              </Button>
-              <Button
-                variant={language === "vi" ? "default" : "ghost"}
-                size="sm"
+              </button>
+              <button
                 onClick={() => setLanguage("vi")}
-                className={`h-7 rounded-full text-xs px-3 ${language === "vi" ? "bg-white text-black shadow-sm hover:bg-white/90" : "hover:bg-transparent"}`}
+                className={`h-7 rounded-full px-3 text-xs font-medium transition-all ${language === "vi"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 VI
-              </Button>
+              </button>
             </div>
 
             {/* Theme toggle */}
@@ -83,6 +94,7 @@ export default function Navigation() {
             {/* Admin link */}
             <Link href="/admin">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
+                <LayoutDashboard className="mr-1.5 h-3.5 w-3.5" />
                 {t("admin.dashboard")}
               </Button>
             </Link>
@@ -94,26 +106,37 @@ export default function Navigation() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -10 }}
             className="border-border bg-background/95 border-t backdrop-blur-sm md:hidden"
           >
-            <div className="space-y-4 py-4">
-              {/* Status */}
-
+            <div className="space-y-2 py-4">
+              {/* Nav links */}
+              <div className="px-4 space-y-1">
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-sm">
+                    {language === "en" ? "Blog" : "Bài viết"}
+                  </Button>
+                </Link>
+                <Link href="/tiktok" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-sm">
+                    TikTok
+                  </Button>
+                </Link>
+              </div>
 
               {/* Language */}
-              <div className="px-4">
-                <div className="text-muted-foreground mb-2 font-mono text-xs">
-                  <span className="text-primary">$</span> {t("home.language")}
+              <div className="px-4 pt-2 border-t border-border/50">
+                <div className="text-muted-foreground mb-2 text-xs font-medium">
+                  {language === "en" ? "Language" : "Ngôn ngữ"}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -136,7 +159,7 @@ export default function Navigation() {
               </div>
 
               {/* Admin link */}
-              <div className="px-4">
+              <div className="px-4 pt-2">
                 <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="default" className="w-full">
                     <LayoutDashboard className="mr-2 h-4 w-4" />

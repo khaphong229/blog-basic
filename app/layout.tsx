@@ -1,15 +1,23 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
+/** Sans-serif font for body text and UI elements */
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-sans",
+})
+
+/** Serif font for editorial headings and hero text */
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-serif",
+  weight: ["400", "500", "600", "700", "800", "900"],
 })
 
 export const metadata: Metadata = {
@@ -58,7 +66,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased ${inter.variable} bg-background text-foreground`}>
+      <body className={`font-sans antialiased ${inter.variable} ${playfairDisplay.variable} bg-background text-foreground`}>
         <ThemeProvider>
           <LanguageProvider>
             <BlogProvider>{children}</BlogProvider>
