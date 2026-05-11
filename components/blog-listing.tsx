@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Search, X, Loader2, Filter } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { BlogCard } from "@/components/ui/blog-card"
 import { Pagination } from "@/components/ui/pagination"
 
@@ -86,9 +84,10 @@ export default function BlogListing({ searchQuery, setSearchQuery }: BlogListing
     <div className="space-y-8">
       {/* Search and filter section */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="bg-card rounded-2xl border border-border p-1 shadow-sm"
       >
         <div className="flex flex-col md:flex-row gap-2 p-2">

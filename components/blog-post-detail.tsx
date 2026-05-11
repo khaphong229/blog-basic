@@ -11,7 +11,10 @@ import {
   Copy,
   Check,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import rehypeHighlight from "rehype-highlight"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,9 +31,25 @@ interface BlogPostDetailProps {
 export default function BlogPostDetail({ post }: BlogPostDetailProps) {
   const { language } = useLanguage()
   const [copied, setCopied] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const articleRef = useRef<HTMLElement>(null)
+
+  /** Track reading progress for progress bar */
+  useEffect(() => {
+    const handleScroll = () => {
+      const article = articleRef.current
+      if (!article) return
+      const rect = article.getBoundingClientRect()
+      const total = rect.height
+      const scrolled = -rect.top + window.innerHeight * 0.3
+      setProgress(Math.min(100, Math.max(0, (scrolled / total) * 100)))
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   /** Calculate reading time (approx 200 words per minute) */
-  const wordCount = post.content.replace(/<[^>]*>/g, "").split(/\s+/).length
+  const wordCount = post.content.replace(/[#*`~>\-|]/g, "").split(/\s+/).length
   const readingTime = Math.max(1, Math.ceil(wordCount / 200))
 
   const formattedDate = post.createdAt.toLocaleDateString(language === "en" ? "en-US" : "vi-VN", {
@@ -57,6 +76,14 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
       transition={{ duration: 0.5 }}
       className="mx-auto max-w-6xl px-4 py-8"
     >
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-border">
+        <motion.div
+          className="h-full bg-primary"
+          style={{ width: `${progress}%` }}
+          transition={{ duration: 0.1 }}
+        />
+      </div> 
       {/* Back navigation */}
       <nav className="mb-8">
         <Link
@@ -111,19 +138,52 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         </div>
       )}
 
-      {/* 2-Column Layout: TOC Sidebar + Article Content */}
-      <div className="flex gap-10 max-w-6xl mx-auto">
-        {/* Sticky TOC Sidebar — desktop only */}
-        <aside className="hidden xl:block w-56 shrink-0">
+      {/* Content area with optional TOC sidebar */}
+      <div className="relative max-w-6xl mx-auto">
+        {/* Sticky TOC Sidebar — desktop only, absolutely positioned to not affect article centering */}
+        <aside className="hidden xl:block absolute left-0 top-0 w-56">
           <div className="sticky top-24">
             <TableOfContents content={post.content} />
           </div>
         </aside>
 
-        {/* Article Content */}
-        <article className="flex-1 max-w-3xl mx-auto min-w-0">
-          <div className="prose prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        {/* Article Content — always centered */}
+        <article ref={articleRef} className="max-w-3xl mx-auto min-w-0">
+          <div className="prose prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm prose-pre:bg-muted prose-pre:border prose-pre:border-border max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+              components={{
+                /** Auto-generate IDs for headings (for TOC links) */
+                h1: ({ children, ...props }) => {
+                  const id = String(children).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                  return <h1 id={id} {...props}>{children}</h1>
+                },
+                h2: ({ children, ...props }) => {
+                  const id = String(children).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                  return <h2 id={id} {...props}>{children}</h2>
+                },
+                h3: ({ children, ...props }) => {
+                  const id = String(children).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                  return <h3 id={id} {...props}>{children}</h3>
+                },
+                /** Open external links in new tab */
+                a: ({ href, children, ...props }) => {
+                  const isExternal = href?.startsWith("http")
+                  return (
+                    <a
+                      href={href}
+                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      {...props}
+                    >
+                      {children}
+                    </a>
+                  )
+                },
+              }}
+            >
+              {post.content}
+            </ReactMarkdown>
           </div>
 
           {/* Footer / Share */}

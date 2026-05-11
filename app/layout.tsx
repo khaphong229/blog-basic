@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/context/language-context"
 import { BlogProvider } from "@/context/blog-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
+import "highlight.js/styles/github.min.css"
 
 /** Sans-serif font for body text and UI elements */
 const inter = Inter({
@@ -21,41 +22,28 @@ const playfairDisplay = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "Dev Blog | Thoughts & Tutorials",
+  title: "APKute | Chia sẻ APK hay & an toàn",
   description:
-    "A clean, minimalist blog for developers. Sharing insights, tutorials, and tech stories.",
-  keywords: ["blog", "developer", "programming", "tech", "tutorials"],
-  authors: [{ name: "Dev Blog" }],
-  creator: "Dev Blog",
+    "Chia sẻ ứng dụng Android hay, kèm link download APK an toàn. Cute & đáng tin cậy!",
+  keywords: ["apk", "download", "android", "ứng dụng", "app", "APKute"],
+  authors: [{ name: "APKute" }],
+  creator: "APKute",
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "vi_VN",
     url: "/",
-    siteName: "Dev Blog",
-    title: "Dev Blog | Thoughts & Tutorials",
-    description: "A clean, minimalist blog for developers",
+    siteName: "APKute",
+    title: "APKute | Chia sẻ APK hay & an toàn",
+    description: "Chia sẻ ứng dụng Android hay, kèm link download APK an toàn",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dev Blog | Thoughts & Tutorials",
-    description: "A clean, minimalist blog for developers",
+    title: "APKute | Chia sẻ APK hay & an toàn",
+    description: "Chia sẻ ứng dụng Android hay, kèm link download APK an toàn",
   },
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 }
 

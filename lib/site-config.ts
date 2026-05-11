@@ -2,6 +2,6 @@
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://devblog.example.com"
 
 /** Site metadata constants */
-export const SITE_NAME = "Dev Blog"
-export const SITE_DESCRIPTION = "A clean, minimalist blog for developers. Sharing insights, tutorials, and tech stories."
-export const SITE_AUTHOR = "Dev Blog"
+export const SITE_NAME = "APKute"
+export const SITE_DESCRIPTION = "Chia sẻ ứng dụng Android hay, kèm link download APK an toàn. Cute & đáng tin cậy!"
+export const SITE_AUTHOR = "APKute"

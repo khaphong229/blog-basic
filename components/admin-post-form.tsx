@@ -4,13 +4,14 @@ import type React from "react"
 import RichTextEditor from "./rich-text-editor"
 import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { X, Plus, Send, FileText, User, AlignLeft, Tag, AlertCircle, Languages, Loader2, ImageIcon } from "lucide-react"
-import { Checkbox } from "@/components/ui/checkbox"
 import ImageUpload from "@/components/image-upload"
+import AuthorSelect from "@/components/author-select"
+import { createClient } from "@/lib/supabase/client"
 
 export default function AdminPostForm() {
   const { language, t } = useLanguage()
@@ -26,6 +27,22 @@ export default function AdminPostForm() {
   const [tagInput, setTagInput] = useState("")
   const [tags, setTags] = useState<string[]>([])
   const [featuredImage, setFeaturedImage] = useState<string | null>(null)
+  /** Existing tags fetched from DB for suggestions */
+  const [existingTags, setExistingTags] = useState<string[]>([])
+
+  /** Load existing tags from DB on mount */
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.from("tags").select("slug")
+        if (data) setExistingTags((data as { slug: string }[]).map((t) => t.slug))
+      } catch (err) {
+        console.error("Failed to load tags:", err)
+      }
+    }
+    loadTags()
+  }, [])
 
 
   const handleAddTag = () => {
@@ -45,17 +62,11 @@ export default function AdminPostForm() {
     setError(null)
     setSuccess(false)
 
-    if (
-      !title.trim() ||
-      !excerpt.trim() ||
-      !content.trim() ||
-      !author.trim() ||
-      tags.length === 0
-    ) {
+    if (!title.trim() || !content.trim() || !author.trim()) {
       setError(
         language === "en"
-          ? "Please fill in all required fields"
-          : "Vui lòng điền đầy đủ các trường bắt buộc"
+          ? "Please fill in Title, Author and Content"
+          : "Vui lòng điền Tiêu đề, Tác giả và Nội dung"
       )
       return
     }
@@ -176,13 +187,11 @@ export default function AdminPostForm() {
                 {language === "en" ? "Author" : "Tác giả"}
                 <span className="text-destructive">*</span>
               </label>
-              <Input
-                placeholder={language === "en" ? "Your name" : "Tên của bạn"}
+              <AuthorSelect
                 value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                required
+                onChange={setAuthor}
                 disabled={isSubmitting}
-                className="border-border/70 focus:border-primary h-11"
+                placeholder={language === "en" ? "Select author..." : "Chọn tác giả..."}
               />
             </div>
 
@@ -190,7 +199,7 @@ export default function AdminPostForm() {
               <label className="text-foreground flex items-center gap-2 text-sm font-semibold">
                 <AlignLeft className="text-muted-foreground h-4 w-4" />
                 {language === "en" ? "Excerpt" : "Tóm tắt"}
-                <span className="text-destructive">*</span>
+                <span className="text-muted-foreground text-xs font-normal ml-1">(optional)</span>
               </label>
               <Input
                 placeholder={
@@ -198,7 +207,6 @@ export default function AdminPostForm() {
                 }
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
-                required
                 disabled={isSubmitting}
                 className="border-border/70 focus:border-primary h-11"
               />
@@ -241,7 +249,7 @@ export default function AdminPostForm() {
             <label className="text-foreground flex items-center gap-2 text-sm font-semibold">
               <Tag className="text-muted-foreground h-4 w-4" />
               {language === "en" ? "Tags" : "Thẻ"}
-              <span className="text-destructive">*</span>
+              <span className="text-muted-foreground text-xs font-normal ml-1">(optional)</span>
             </label>
 
             <div className="flex gap-2">
@@ -272,13 +280,29 @@ export default function AdminPostForm() {
               </Button>
             </div>
 
-            {/* Tags Display */}
-            <div className="bg-muted/30 border-border/50 min-h-[44px] rounded-lg border p-3">
-              {tags.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  {language === "en" ? "At least one tag is required" : "Cần ít nhất một thẻ"}
-                </p>
-              ) : (
+            {/* Tag suggestions from DB */}
+            {existingTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {existingTags
+                  .filter((t) => !tags.includes(t))
+                  .slice(0, 15)
+                  .map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setTags([...tags, tag])}
+                      disabled={isSubmitting}
+                      className="bg-muted/50 hover:bg-primary/10 hover:text-primary border border-border/50 rounded-full px-2.5 py-1 text-xs text-muted-foreground transition-colors cursor-pointer"
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+              </div>
+            )}
+
+            {/* Selected Tags Display */}
+            {tags.length > 0 && (
+              <div className="bg-muted/30 border-border/50 rounded-lg border p-3">
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <span
@@ -297,28 +321,30 @@ export default function AdminPostForm() {
                     </span>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* Auto-translate Info (only for Vietnamese posts) */}
-          {language === "vi" && (
-            <div className="bg-muted/30 border-border/50 rounded-lg border p-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                  <Languages className="text-primary h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-foreground text-sm font-medium">
-                    Tiếng Anh sẽ được tạo tự động
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    Hệ thống sẽ dùng AI để dịch và tạo bài viết tiếng Anh song song.
-                  </p>
-                </div>
+          {/* Auto-translate Info — shown for both EN and VI */}
+          <div className="bg-muted/30 border-border/50 rounded-lg border p-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Languages className="text-primary h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-foreground text-sm font-medium">
+                  {language === "vi"
+                    ? "Tiếng Anh sẽ được tạo tự động"
+                    : "Vietnamese version will be auto-created"}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {language === "vi"
+                    ? "Hệ thống sẽ dùng AI để dịch và tạo bài viết tiếng Anh song song."
+                    : "AI will translate and create a Vietnamese version automatically."}
+                </p>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Submit Button */}
           <div className="border-border/50 border-t pt-4">
@@ -326,7 +352,7 @@ export default function AdminPostForm() {
               type="submit"
               size="lg"
               className="h-12 w-full cursor-pointer px-8 text-base font-semibold sm:w-auto"
-              disabled={isSubmitting || tags.length === 0}
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>

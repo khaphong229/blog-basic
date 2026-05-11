@@ -9,7 +9,7 @@ describe("Site Config", () => {
   })
 
   it("exports SITE_NAME", () => {
-    expect(SITE_NAME).toBe("Dev Blog")
+    expect(SITE_NAME).toBe("APKute")
   })
 
   it("exports SITE_DESCRIPTION", () => {

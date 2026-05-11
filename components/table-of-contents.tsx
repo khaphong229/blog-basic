@@ -23,22 +23,19 @@ interface TableOfContentsProps {
 export default function TableOfContents({ content, className }: TableOfContentsProps) {
     const [activeId, setActiveId] = useState<string>("")
 
-    /** Parse headings from HTML content */
+    /** Parse headings from Markdown content (## and ### lines) */
     const headings = useMemo((): TocItem[] => {
-        const parser = typeof window !== "undefined" ? new DOMParser() : null
-        if (!parser) return []
-
-        const doc = parser.parseFromString(content, "text/html")
-        const elements = doc.querySelectorAll("h2, h3")
         const items: TocItem[] = []
+        const lines = content.split("\n")
 
-        elements.forEach((el, index) => {
-            const id = el.id || `heading-${index}`
-            items.push({
-                id,
-                text: el.textContent?.trim() || "",
-                level: parseInt(el.tagName.charAt(1)),
-            })
+        lines.forEach((line) => {
+            const match = line.match(/^(#{2,3})\s+(.+)$/)
+            if (match) {
+                const level = match[1].length
+                const text = match[2].trim()
+                const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                items.push({ id, text, level })
+            }
         })
 
         return items

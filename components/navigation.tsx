@@ -32,8 +32,8 @@ export default function Navigation() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${isScrolled
-        ? "bg-background/80 border-border border-b shadow-sm backdrop-blur-md"
-        : "bg-transparent"
+        ? "bg-background/85 border-border border-b shadow-sm backdrop-blur-lg"
+        : "bg-background/50 backdrop-blur-sm"
         }`}
     >
       <div className="container mx-auto px-4">
@@ -42,10 +42,10 @@ export default function Navigation() {
           {/* Logo — Serif font for editorial feel */}
           <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">D</span>
+              <span className="text-sm font-bold text-primary-foreground">A</span>
             </div>
             <span className="font-serif text-xl font-bold tracking-tight text-foreground">
-              DevBlog
+              APKute
             </span>
           </Link>
 
@@ -92,12 +92,12 @@ export default function Navigation() {
             <ThemeToggle />
 
             {/* Admin link */}
-            <Link href="/admin">
+            {/* <Link href="/admin">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm font-medium">
                 <LayoutDashboard className="mr-1.5 h-3.5 w-3.5" />
                 {t("admin.dashboard")}
               </Button>
-            </Link>
+            </Link> */}
           </div>
 
           {/* Mobile menu button */}

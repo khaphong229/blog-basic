@@ -196,29 +196,16 @@ export function PostsProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    // CRUD: Add post (with auto-translation for VI)
+    // CRUD: Add post (translation is non-blocking — post saves even if translation fails)
     const addPost = async (
         post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "comments" | "slug" | "shortUrl" | "linkedPostId">
     ) => {
         try {
             const slug = generateSlug(post.title)
             const now = new Date().toISOString()
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let translationResult: any = null
-
-            if (post.language === "vi") {
-                try {
-                    translationResult = await translatePost({
-                        title: post.title, excerpt: post.excerpt,
-                        content: post.content, tags: post.tags,
-                    })
-                } catch (error) {
-                    console.error("Translation failed:", error)
-                    throw new Error("Không thể dịch bài viết sang tiếng Anh. Vui lòng thử lại.")
-                }
-            }
-
             const supabase = createClient()
+
+            // STEP 1: Save the original post FIRST (always succeeds)
             const { data: newPost, error: insertError } = await supabase
                 .from("posts")
                 .insert({
@@ -234,41 +221,7 @@ export function PostsProvider({ children }: { children: ReactNode }) {
             if (insertError) throw insertError
             const newPostId = (newPost as { id: string }).id
 
-            // Create EN translation if VI post
-            if (post.language === "vi" && translationResult) {
-                const enSlug = generateSlug(translationResult.translatedTitle)
-                const { data: enPost, error: enInsertError } = await supabase
-                    .from("posts")
-                    .insert({
-                        language: "en", title: translationResult.translatedTitle, slug: enSlug,
-                        excerpt: translationResult.translatedExcerpt || null,
-                        content: translationResult.translatedContent, author: post.author,
-                        featured_image: post.featuredImage || null,
-                        status: post.status || "draft",
-                        published_at: post.status === "published" ? now : null,
-                        linked_post_id: newPostId,
-                    } as never)
-                    .select().single()
-
-                if (enInsertError) {
-                    await supabase.from("posts").delete().eq("id", newPostId)
-                    throw enInsertError
-                }
-
-                const enPostId = (enPost as { id: string }).id
-                await supabase.from("posts").update({ linked_post_id: enPostId } as never).eq("id", newPostId)
-
-                // Copy tiktok_code from VI post to EN post (shared code)
-                const viTiktokCode = (newPost as { tiktok_code: number | null }).tiktok_code
-                if (viTiktokCode) {
-                    await supabase.from("posts").update({ tiktok_code: viTiktokCode } as never).eq("id", enPostId)
-                }
-
-                if (translationResult.translatedTags?.length > 0) {
-                    await handleTags(enPostId, translationResult.translatedTags)
-                }
-            }
-
+            // Tags for original post
             if (post.tags?.length > 0) await handleTags(newPostId, post.tags)
 
             // Short URL
@@ -277,6 +230,50 @@ export function PostsProvider({ children }: { children: ReactNode }) {
                 original_url: `/blog/${slug}`, short_url: `/s/${shortCode}`,
                 short_code: shortCode, language: post.language, post_id: newPostId,
             } as never)
+
+            // STEP 2: Try translation (non-blocking — if it fails, post is still saved)
+            const targetLang = post.language === "vi" ? "en" : "vi"
+            try {
+                const translationResult = await translatePost({
+                    title: post.title, excerpt: post.excerpt,
+                    content: post.content, tags: post.tags,
+                    sourceLang: post.language,
+                })
+
+                if (translationResult) {
+                    const translatedSlug = generateSlug(translationResult.translatedTitle)
+                    const { data: translatedPost, error: translatedInsertError } = await supabase
+                        .from("posts")
+                        .insert({
+                            language: targetLang, title: translationResult.translatedTitle, slug: translatedSlug,
+                            excerpt: translationResult.translatedExcerpt || null,
+                            content: translationResult.translatedContent, author: post.author,
+                            featured_image: post.featuredImage || null,
+                            status: post.status || "draft",
+                            published_at: post.status === "published" ? now : null,
+                            linked_post_id: newPostId,
+                        } as never)
+                        .select().single()
+
+                    if (!translatedInsertError && translatedPost) {
+                        const translatedPostId = (translatedPost as { id: string }).id
+                        await supabase.from("posts").update({ linked_post_id: translatedPostId } as never).eq("id", newPostId)
+
+                        // Copy tiktok_code (shared between linked posts)
+                        const tiktokCode = (newPost as { tiktok_code: number | null }).tiktok_code
+                        if (tiktokCode) {
+                            await supabase.from("posts").update({ tiktok_code: tiktokCode } as never).eq("id", translatedPostId)
+                        }
+
+                        if (translationResult.translatedTags?.length > 0) {
+                            await handleTags(translatedPostId, translationResult.translatedTags)
+                        }
+                    }
+                }
+            } catch (translationError) {
+                // Translation failed but post is already saved — just log it
+                console.warn("[addPost] Translation failed (post saved without translation):", translationError)
+            }
 
             await fetchPosts()
         } catch (err) {
@@ -291,7 +288,6 @@ export function PostsProvider({ children }: { children: ReactNode }) {
             const supabase = createClient()
             const updateData: Record<string, unknown> = {}
             const currentPost = posts.find(p => p.id === id)
-            const isViPost = currentPost?.language === "vi"
             const hasLinkedPost = !!currentPost?.linkedPostId
 
             if (updates.title !== undefined) updateData.title = updates.title
@@ -308,13 +304,27 @@ export function PostsProvider({ children }: { children: ReactNode }) {
             if (updates.featuredImage !== undefined) updateData.featured_image = updates.featuredImage
             if (updates.linkedPostId !== undefined) updateData.linked_post_id = updates.linkedPostId
 
-            if (isViPost && hasLinkedPost && currentPost) {
+            // STEP 1: Save updates to original post FIRST
+            if (Object.keys(updateData).length > 0) {
+                const { error: updateError } = await supabase
+                    .from("posts").update(updateData as never).eq("id", id)
+                if (updateError) throw updateError
+            }
+
+            if (updates.tags !== undefined) {
+                await supabase.from("post_tags").delete().eq("post_id", id)
+                await handleTags(id, updates.tags)
+            }
+
+            // STEP 2: Try auto-sync translated post (non-blocking)
+            if (hasLinkedPost && currentPost) {
                 try {
                     const translation = await translatePost({
                         title: updates.title || currentPost.title,
                         excerpt: updates.excerpt || currentPost.excerpt,
                         content: updates.content || currentPost.content,
                         tags: updates.tags || currentPost.tags,
+                        sourceLang: currentPost.language,
                     })
                     if (currentPost.linkedPostId) {
                         await supabase.from("posts").update({
@@ -329,20 +339,9 @@ export function PostsProvider({ children }: { children: ReactNode }) {
                         }
                     }
                 } catch (error) {
-                    console.error("Auto-translation for update failed:", error)
-                    throw new Error("Không thể cập nhật bản dịch tiếng Anh. Vui lòng thử lại.")
+                    // Translation sync failed but original update is saved
+                    console.warn("[updatePost] Translation sync failed (update saved):", error)
                 }
-            }
-
-            if (Object.keys(updateData).length > 0) {
-                const { error: updateError } = await supabase
-                    .from("posts").update(updateData as never).eq("id", id)
-                if (updateError) throw updateError
-            }
-
-            if (updates.tags !== undefined) {
-                await supabase.from("post_tags").delete().eq("post_id", id)
-                await handleTags(id, updates.tags)
             }
 
             await fetchPosts()

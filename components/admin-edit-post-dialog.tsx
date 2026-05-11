@@ -3,7 +3,7 @@
 import type { BlogPost } from "@/context/blog-context"
 import { useLanguage } from "@/context/language-context"
 import { useBlog } from "@/context/blog-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,6 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import RichTextEditor from "./rich-text-editor"
+import AuthorSelect from "@/components/author-select"
+import { createClient } from "@/lib/supabase/client"
 
 interface AdminEditPostDialogProps {
   post: BlogPost
@@ -33,6 +35,21 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
   const [author, setAuthor] = useState(post.author)
   const [tagInput, setTagInput] = useState("")
   const [tags, setTags] = useState<string[]>(post.tags)
+  const [existingTags, setExistingTags] = useState<string[]>([])
+
+  /** Load existing tags from DB on mount */
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.from("tags").select("slug")
+        if (data) setExistingTags((data as { slug: string }[]).map((t) => t.slug))
+      } catch (err) {
+        console.error("Failed to load tags:", err)
+      }
+    }
+    loadTags()
+  }, [])
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -46,13 +63,7 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
   }
 
   const handleSave = async () => {
-    if (
-      !title.trim() ||
-      !excerpt.trim() ||
-      !content.trim() ||
-      !author.trim() ||
-      tags.length === 0
-    ) {
+    if (!title.trim() || !content.trim() || !author.trim()) {
       return
     }
 
@@ -111,7 +122,11 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
             <label className="mb-2 block text-sm font-semibold">
               {language === "en" ? "Author" : "Tác giả"}
             </label>
-            <Input value={author} onChange={(e) => setAuthor(e.target.value)} />
+            <AuthorSelect
+              value={author}
+              onChange={setAuthor}
+              placeholder={language === "en" ? "Select author..." : "Chọn tác giả..."}
+            />
           </div>
 
           <div>
@@ -146,6 +161,24 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
                 {language === "en" ? "Add" : "Thêm"}
               </Button>
             </div>
+            {/* Tag suggestions */}
+            {existingTags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {existingTags
+                  .filter((t) => !tags.includes(t))
+                  .slice(0, 10)
+                  .map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setTags([...tags, tag])}
+                      className="bg-muted/50 hover:bg-primary/10 hover:text-primary border border-border/50 rounded-full px-2 py-0.5 text-xs text-muted-foreground transition-colors cursor-pointer"
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+              </div>
+            )}
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
@@ -169,7 +202,7 @@ export default function AdminEditPostDialog({ post, onEdit }: AdminEditPostDialo
             <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
               {t("admin.cancel")}
             </Button>
-            <Button onClick={handleSave} disabled={tags.length === 0 || isSubmitting}>
+            <Button onClick={handleSave} disabled={isSubmitting}>
               {isSubmitting
                 ? language === "en"
                   ? "Saving..."

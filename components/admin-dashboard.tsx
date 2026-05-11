@@ -5,7 +5,7 @@ import { useBlog } from "@/context/blog-context"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Settings, FileText, PenLine, TrendingUp, LogOut, MessageSquare } from "lucide-react"
+import { Settings, FileText, PenLine, TrendingUp, LogOut, Tag } from "lucide-react"
 
 import Navigation from "./navigation"
 import AdminPostForm from "./admin-post-form"
@@ -85,6 +85,12 @@ export default function AdminDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <Link href="/admin/tags">
+                <Button variant="outline" size="sm" className="gap-2 rounded-lg text-sm">
+                  <Tag className="h-4 w-4" />
+                  {t("admin.tags")}
+                </Button>
+              </Link>
               <Link href="/admin/settings">
                 <Button variant="outline" size="sm" className="gap-2 rounded-lg text-sm">
                   <Settings className="h-4 w-4" />

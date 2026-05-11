@@ -50,6 +50,12 @@ CRITICAL: When you encounter a file reference (e.g., @.opencode/rules/ui.md), us
 - Configuring Vitest.
 - Debugging test failures.
 
+### 5. Language & Communication
+**Reference**: `@.opencode/rules/language.md`
+**When to read**:
+- Before composing any assistant reply to the user.
+- When deciding response language/tone for chat output.
+
 ## Key Directories
 - `app/` - Next.js App Router pages
 - `components/` - React components (`ui/` for shadcn)
