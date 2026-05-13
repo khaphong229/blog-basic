@@ -4,6 +4,26 @@
  */
 
 // ===========================================
+// GenericSchema Helpers
+// Supabase's GenericTable requires Row, Insert, Update
+// to satisfy Record<string, unknown>. Regular interfaces
+// don't have index signatures — these helpers ensure
+// compatibility by intersecting with Record<string, unknown>.
+// ===========================================
+
+type AsGenericTable<T extends { Row: any; Insert: any; Update: any }> = {
+  Row: T["Row"] & Record<string, unknown>
+  Insert: T["Insert"] & Record<string, unknown>
+  Update: T["Update"] & Record<string, unknown>
+  Relationships: []
+}
+
+type AsGenericView<T extends { Row: any }> = {
+  Row: T["Row"] & Record<string, unknown>
+  Relationships: []
+}
+
+// ===========================================
 // Enums & Constants
 // ===========================================
 
@@ -95,6 +115,36 @@ export interface UrlShortenerLog {
   created_at: string
 }
 
+export interface PostResourceRow {
+  id: string
+  post_id: string
+  title: string
+  type: "upload" | "external"
+  file_path: string | null
+  file_name: string | null
+  file_size: number | null
+  external_url: string | null
+  sort_order: number
+  download_count: number
+  created_at: string
+}
+
+export interface GateStepRow {
+  id: string
+  resource_id: string
+  label: string
+  url: string
+  sort_order: number
+  created_at: string
+}
+
+export interface GateCompletionRow {
+  id: string
+  step_id: string
+  session_id: string
+  completed_at: string
+}
+
 // ===========================================
 // Insert Types (for creating new records)
 // ===========================================
@@ -139,6 +189,25 @@ export type UrlShortenerLogInsert = Omit<UrlShortenerLog, "id" | "created_at"> &
   created_at?: string
 }
 
+export type PostResourceInsert = Omit<
+  PostResourceRow,
+  "id" | "download_count" | "created_at"
+> & {
+  id?: string
+  download_count?: number
+  created_at?: string
+}
+
+export type GateStepInsert = Omit<GateStepRow, "id" | "created_at"> & {
+  id?: string
+  created_at?: string
+}
+
+export type GateCompletionInsert = Omit<GateCompletionRow, "id" | "completed_at"> & {
+  id?: string
+  completed_at?: string
+}
+
 // ===========================================
 // Update Types (for updating records)
 // ===========================================
@@ -150,6 +219,12 @@ export type UrlShortenerConfigUpdate = Partial<
   Omit<UrlShortenerConfig, "id" | "language" | "created_at">
 >
 export type ShortenedUrlUpdate = Partial<Omit<ShortenedUrl, "id" | "created_at">>
+
+export type PostResourceUpdate = Partial<
+  Omit<PostResourceRow, "id" | "created_at" | "download_count">
+>
+
+export type GateStepUpdate = Partial<Omit<GateStepRow, "id" | "created_at">>
 
 // ===========================================
 // Extended Types (with relations)
@@ -176,46 +251,61 @@ export interface PostFull extends Post {
 export interface Database {
   public: {
     Tables: {
-      posts: {
+      posts: AsGenericTable<{
         Row: Post
         Insert: PostInsert
         Update: PostUpdate
-      }
-      tags: {
+      }>
+      tags: AsGenericTable<{
         Row: Tag
         Insert: TagInsert
         Update: TagUpdate
-      }
-      post_tags: {
+      }>
+      post_tags: AsGenericTable<{
         Row: PostTag
         Insert: PostTag
         Update: never
-      }
-      comments: {
+      }>
+      comments: AsGenericTable<{
         Row: Comment
         Insert: CommentInsert
         Update: CommentUpdate
-      }
-      url_shortener_config: {
+      }>
+      url_shortener_config: AsGenericTable<{
         Row: UrlShortenerConfig
         Insert: UrlShortenerConfigInsert
         Update: UrlShortenerConfigUpdate
-      }
-      shortened_urls: {
+      }>
+      shortened_urls: AsGenericTable<{
         Row: ShortenedUrl
         Insert: ShortenedUrlInsert
         Update: ShortenedUrlUpdate
-      }
-      url_shortener_logs: {
+      }>
+      url_shortener_logs: AsGenericTable<{
         Row: UrlShortenerLog
         Insert: UrlShortenerLogInsert
         Update: never
-      }
+      }>
+      post_resources: AsGenericTable<{
+        Row: PostResourceRow
+        Insert: PostResourceInsert
+        Update: PostResourceUpdate
+      }>
+      gate_steps: AsGenericTable<{
+        Row: GateStepRow
+        Insert: GateStepInsert
+        Update: GateStepUpdate
+      }>
+      gate_completions: AsGenericTable<{
+        Row: GateCompletionRow
+        Insert: GateCompletionInsert
+        Update: never
+      }>
     }
     Views: {
-      public_posts: {
+      public_posts: AsGenericView<{
         Row: Post
-      }
+      }>
     }
     Functions: {
       increment_view_count: {
@@ -224,6 +314,10 @@ export interface Database {
       }
       increment_click_count: {
         Args: { url_id: string }
+        Returns: void
+      }
+      increment_resource_download_count: {
+        Args: { res_id: string }
         Returns: void
       }
     }

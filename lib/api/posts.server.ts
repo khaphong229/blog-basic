@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import type { Post, PostWithTags, Tag, Language, Comment } from "@/lib/supabase"
+import type { Post, PostWithTags, Tag, Language, Comment, PostResourceRow, GateStepRow } from "@/lib/supabase"
 
 // ===========================================
 // Server-side data fetching (for Server Components)
@@ -61,13 +61,17 @@ export async function getPublishedPostsServer(language: Language): Promise<PostW
 }
 
 /**
- * Get a single post by slug with full details (tags + comments)
+ * Get a single post by slug with full details (tags + comments + resources)
  * For server-rendered blog detail page
  */
 export async function getPostBySlugServer(
   slug: string,
   language: Language
-): Promise<(PostWithTags & { comments: Comment[] }) | null> {
+): Promise<
+  (PostWithTags & { comments: Comment[] }) & {
+    resources?: PostResourceDisplay[]
+  } | null
+> {
   const supabase = await createClient()
 
   const { data: post, error } = await supabase
@@ -107,7 +111,88 @@ export async function getPostBySlugServer(
 
   const comments = (commentsData as Comment[]) || []
 
-  return { ...typedPost, tags, comments }
+  // --- Fetch gated download resources ---
+  const resources = await getPostResourcesServer(typedPost.id)
+
+  return { ...typedPost, tags, comments, resources }
+}
+
+/**
+ * Fetch downloadable resources with their gate steps for a post
+ */
+async function getPostResourcesServer(postId: string) {
+  const supabase = await createClient()
+
+  const { data: resourceRows } = await supabase
+    .from("post_resources")
+    .select("*")
+    .eq("post_id", postId)
+    .order("sort_order", { ascending: true })
+
+  if (!resourceRows || resourceRows.length === 0) return undefined
+
+  const resourceIds = (resourceRows as { id: string }[]).map((r) => r.id)
+
+  // Fetch all steps for these resources in one query
+  const { data: stepRows } = await supabase
+    .from("gate_steps")
+    .select("*")
+    .in("resource_id", resourceIds)
+    .order("sort_order", { ascending: true })
+
+  const stepsByResource = new Map<string, GateStepRow[]>()
+  if (stepRows) {
+    for (const step of stepRows as GateStepRow[]) {
+      const existing = stepsByResource.get(step.resource_id) || []
+      existing.push(step)
+      stepsByResource.set(step.resource_id, existing)
+    }
+  }
+
+  return (resourceRows as PostResourceRow[]).map((row) => ({
+    id: row.id,
+    postId: row.post_id,
+    title: row.title,
+    type: row.type as "upload" | "external",
+    filePath: row.file_path,
+    fileName: row.file_name,
+    fileSize: row.file_size,
+    externalUrl: row.external_url,
+    sortOrder: row.sort_order,
+    downloadCount: row.download_count,
+    createdAt: row.created_at,
+    gateSteps: (stepsByResource.get(row.id) || []).map((s) => ({
+      id: s.id,
+      resourceId: s.resource_id,
+      label: s.label,
+      url: s.url,
+      sortOrder: s.sort_order,
+    })),
+  }))
+}
+
+/**
+ * Post resource display type for the client BlogPost
+ */
+export type PostResourceDisplay = {
+  id: string
+  postId: string
+  title: string
+  type: "upload" | "external"
+  filePath: string | null
+  fileName: string | null
+  fileSize: number | null
+  externalUrl: string | null
+  sortOrder: number
+  downloadCount: number
+  createdAt: string
+  gateSteps: {
+    id: string
+    resourceId: string
+    label: string
+    url: string
+    sortOrder: number
+  }[]
 }
 
 /**

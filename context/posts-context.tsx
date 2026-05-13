@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import type { Post, PostWithTags, Tag } from "@/lib/supabase"
+import type { Post, PostWithTags, Tag, PostResourceRow, GateStepRow } from "@/lib/supabase"
 import { translatePost } from "@/lib/api/translation"
 import type { BlogPost, Comment } from "@/types/blog"
+import type { PostResource } from "@/types/gate"
 
 // ===========================================
 // Helper Functions
@@ -76,6 +77,10 @@ interface PostsContextType {
     getAllTags: (language: "en" | "vi") => string[]
     addComment: (postId: string, comment: Omit<Comment, "id" | "createdAt">) => Promise<void>
     refreshPosts: () => Promise<void>
+    /** Fetch gated download resources with their unlock steps */
+    fetchResources: (postId: string) => Promise<PostResource[]>
+    /** Save (upsert) resources with their unlock steps */
+    saveResources: (postId: string, resources: PostResource[]) => Promise<void>
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined)
@@ -410,11 +415,113 @@ export function PostsProvider({ children }: { children: ReactNode }) {
 
     const refreshPosts = async () => { await fetchPosts() }
 
+    /** Fetch resources + steps for a post */
+    const fetchResources = async (postId: string): Promise<PostResource[]> => {
+        try {
+            const supabase = createClient()
+
+            const { data: resourceRows } = await supabase
+                .from("post_resources")
+                .select("*")
+                .eq("post_id", postId)
+                .order("sort_order", { ascending: true })
+
+            if (!resourceRows || resourceRows.length === 0) return []
+
+            const rows = resourceRows as PostResourceRow[]
+            const resourceIds = rows.map((r) => r.id)
+
+            const { data: stepRows } = await supabase
+                .from("gate_steps")
+                .select("*")
+                .in("resource_id", resourceIds)
+                .order("sort_order", { ascending: true })
+
+            const stepsByResource = new Map<string, GateStepRow[]>()
+            if (stepRows) {
+                for (const step of stepRows as GateStepRow[]) {
+                    const existing = stepsByResource.get(step.resource_id) || []
+                    existing.push(step)
+                    stepsByResource.set(step.resource_id, existing)
+                }
+            }
+
+            return rows.map((row) => ({
+                id: row.id,
+                postId: row.post_id,
+                title: row.title,
+                type: row.type as "upload" | "external",
+                filePath: row.file_path,
+                fileName: row.file_name,
+                fileSize: row.file_size,
+                externalUrl: row.external_url,
+                sortOrder: row.sort_order,
+                downloadCount: row.download_count,
+                createdAt: row.created_at,
+                gateSteps: (stepsByResource.get(row.id) || []).map((s) => ({
+                    id: s.id,
+                    resourceId: s.resource_id,
+                    label: s.label,
+                    url: s.url,
+                    sortOrder: s.sort_order,
+                })),
+            }))
+        } catch (err) {
+            console.error("[fetchResources] Error:", err)
+            throw err
+        }
+    }
+
+    /** Save resources + steps for a post (delete-all + re-insert) */
+    const saveResources = async (postId: string, resources: PostResource[]): Promise<void> => {
+        try {
+            const supabase = createClient()
+
+            // Delete all existing resources (CASCADE deletes steps + completions)
+            await supabase.from("post_resources").delete().eq("post_id", postId)
+
+            for (const resource of resources) {
+                const { data: newResource } = await supabase
+                    .from("post_resources")
+                    .insert({
+                        post_id: postId,
+                        title: resource.title || "Untitled",
+                        type: resource.type,
+                        file_path: resource.filePath ?? null,
+                        file_name: resource.fileName ?? null,
+                        file_size: resource.fileSize ?? null,
+                        external_url: resource.externalUrl ?? null,
+                        sort_order: resource.sortOrder,
+                    })
+                    .select("id")
+                    .single()
+
+                const newId = (newResource as { id: string } | null)?.id
+                if (!newId) continue
+
+                if (resource.gateSteps && resource.gateSteps.length > 0) {
+                    await supabase.from("gate_steps").insert(
+                        resource.gateSteps.map((step) => ({
+                            resource_id: newId,
+                            label: step.label || "Step",
+                            url: step.url,
+                            sort_order: step.sortOrder,
+                        }))
+                    )
+                }
+            }
+        } catch (err) {
+            console.error("[saveResources] Error:", err)
+            throw err
+        }
+    }
+
     return (
         <PostsContext.Provider value={{
             posts, isLoading, error, addPost, updatePost, deletePost,
             getPostBySlug, getPostsByLanguage, searchPosts, getPostsByTag,
             getAllTags, addComment, refreshPosts,
+            fetchResources, saveResources,
         }}>
             {children}
         </PostsContext.Provider>

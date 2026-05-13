@@ -19,6 +19,7 @@ import rehypeHighlight from "rehype-highlight"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import TableOfContents from "@/components/table-of-contents"
+import GatedDownloadSection from "@/components/gate/gated-download-section"
 
 /**
  * Blog post detail view — Chameleon.io inspired layout.
@@ -185,6 +186,14 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
               {post.content}
             </ReactMarkdown>
           </div>
+
+          {/* Gated Download Resources */}
+          {post.resources && post.resources.length > 0 && (
+            <GatedDownloadSection
+              postId={post.id}
+              resources={post.resources}
+            />
+          )}
 
           {/* Footer / Share */}
           <footer className="mt-16 pt-8 border-t border-border">

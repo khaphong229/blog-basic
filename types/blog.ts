@@ -3,6 +3,8 @@
  * Extracted from blog-context.tsx for reuse across contexts
  */
 
+import type { PostResource } from "@/types/gate"
+
 export interface Comment {
   id: string
   name: string
@@ -40,6 +42,8 @@ export interface BlogPost {
   linkedPostId?: string | null
   /** TikTok video reference code (shared between VI/EN linked posts) */
   tiktokCode?: number | null
+  /** Downloadable resources attached to this post (gated) */
+  resources?: PostResource[]
 }
 
 export interface URLShortenerConfig {

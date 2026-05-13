@@ -56,6 +56,8 @@ export function useBlog() {
     getAllTags: postsCtx.getAllTags,
     refreshPosts: postsCtx.refreshPosts,
     addComment: postsCtx.addComment,
+    fetchResources: postsCtx.fetchResources,
+    saveResources: postsCtx.saveResources,
 
     // URL Shortener
     urlConfigs: urlCtx.urlConfigs,

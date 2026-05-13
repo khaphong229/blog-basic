@@ -5,7 +5,7 @@ import { useBlog } from "@/context/blog-context"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Settings, FileText, PenLine, TrendingUp, LogOut, Tag } from "lucide-react"
+import { Settings, FileText, PenLine, TrendingUp, LogOut, Tag, Package } from "lucide-react"
 
 import Navigation from "./navigation"
 import AdminPostForm from "./admin-post-form"
@@ -89,6 +89,12 @@ export default function AdminDashboard() {
                 <Button variant="outline" size="sm" className="gap-2 rounded-lg text-sm">
                   <Tag className="h-4 w-4" />
                   {t("admin.tags")}
+                </Button>
+              </Link>
+              <Link href="/admin/resources">
+                <Button variant="outline" size="sm" className="gap-2 rounded-lg text-sm">
+                  <Package className="h-4 w-4" />
+                  {language === "en" ? "Resources" : "Tài nguyên"}
                 </Button>
               </Link>
               <Link href="/admin/settings">
@@ -206,6 +212,20 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* Gated Download feature hint */}
+              {posts.length > 0 && (
+                <div className="border-b border-border/50 bg-primary/5 px-6 py-2.5">
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Package className="h-3.5 w-3.5 text-primary" />
+                    {language === "en" ? (
+                      <>Click <strong>Edit</strong> on any post to manage <strong>Downloadable Resources</strong> (gate steps + unlock flow)</>
+                    ) : (
+                      <>Click <strong>Edit</strong> để quản lý <strong>Tài nguyên tải xuống</strong> (gate steps + mở khóa)</>
+                    )}
+                  </p>
+                </div>
+              )}
               <div className="p-6">
                 <AdminPostsList posts={posts} />
               </div>

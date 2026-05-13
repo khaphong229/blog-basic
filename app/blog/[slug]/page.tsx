@@ -1,6 +1,10 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getPostBySlugServer, incrementViewCountServer } from "@/lib/api/posts.server"
+import {
+  getPostBySlugServer,
+  incrementViewCountServer,
+  type PostResourceDisplay,
+} from "@/lib/api/posts.server"
 import BlogPostDetail from "@/components/blog-post-detail"
 import CommentsSection from "@/components/comments-section"
 import Navigation from "@/components/navigation"
@@ -102,6 +106,26 @@ export default async function BlogDetailPage(props: {
     seoDescription: post.seo_description,
     featuredImage: post.featured_image,
     linkedPostId: post.linked_post_id,
+    resources: post.resources?.map((r: PostResourceDisplay) => ({
+      id: r.id,
+      postId: r.postId,
+      title: r.title,
+      type: r.type,
+      filePath: r.filePath,
+      fileName: r.fileName,
+      fileSize: r.fileSize,
+      externalUrl: r.externalUrl,
+      sortOrder: r.sortOrder,
+      downloadCount: r.downloadCount,
+      gateSteps: r.gateSteps.map((s) => ({
+        id: s.id,
+        resourceId: s.resourceId,
+        label: s.label,
+        url: s.url,
+        sortOrder: s.sortOrder,
+      })),
+      createdAt: r.createdAt,
+    })),
   }
 
   return (
